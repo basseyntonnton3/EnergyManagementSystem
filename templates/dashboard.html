@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Energy Management System - Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --sunset-orange: #ff7e5f;
+        --sunset-yellow: #feb47b;
+        --dark-blue: #1a2b4c;
+        --light-bg: #ffffff;
+        --light-text: #1a2b4c;
+        --light-card-bg: #f8f9fa;
+        --light-border: rgba(0, 0, 0, 0.1);
+        --light-hover: #e9ecef;
+        --dark-bg: #1a2b4c;
+        --dark-text: #ffffff;
+        --dark-card-bg: rgba(255, 255, 255, 0.1);
+        --dark-border: rgba(255, 255, 255, 0.1);
+        --dark-hover: rgba(255, 255, 255, 0.05);
+      }
+
+      body {
+        min-height: 100vh;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      [data-theme="light"] {
+        --bg-color: var(--light-bg);
+        --text-color: var(--light-text);
+        --card-bg: var(--light-card-bg);
+        --border-color: var(--light-border);
+        --hover-color: var(--light-hover);
+      }
+
+      [data-theme="dark"] {
+        --bg-color: var(--dark-bg);
+        --text-color: var(--dark-text);
+        --card-bg: var(--dark-card-bg);
+        --border-color: var(--dark-border);
+        --hover-color: var(--dark-hover);
+      }
+
+      [data-theme="system"] {
+        --bg-color: var(--light-bg);
+        --text-color: var(--light-text);
+        --card-bg: var(--light-card-bg);
+        --border-color: var(--light-border);
+        --hover-color: var(--light-hover);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        [data-theme="system"] {
+          --bg-color: var(--dark-bg);
+          --text-color: var(--dark-text);
+          --card-bg: var(--dark-card-bg);
+          --border-color: var(--dark-border);
+          --hover-color: var(--dark-hover);
+        }
+      }
+
+      .view-section {
+        display: none;
+      }
+
+      .view-section.active {
+        display: block;
+      }
+
+      .location-card,
+      .power-pack-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .location-card:hover,
+      .power-pack-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .progress {
+        height: 8px;
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      .progress-bar {
+        background: linear-gradient(
+          135deg,
+          var(--sunset-orange),
+          var(--sunset-yellow)
+        );
+      }
+
+      .navbar {
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+      }
+
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0;
+      }
+
+      .navbar-brand img {
+        height: 45px;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        transition: transform 0.3s ease;
+      }
+
+      .navbar-brand:hover img {
+        transform: scale(1.05);
+      }
+
+      .theme-toggle {
+        position: relative;
+        margin-left: 1rem;
+      }
+
+      .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+        color: var(--sunset-yellow);
+      }
+
+      .metric-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+      }
+
+      .btn-control {
+        background: linear-gradient(
+          135deg,
+          var(--sunset-orange),
+          var(--sunset-yellow)
+        );
+        border: none;
+        color: var(--dark-blue);
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-control:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 126, 95, 0.3);
+      }
+
+      .form-control {
+        background: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+      }
+
+      .form-control:focus {
+        background: var(--card-bg);
+        border-color: var(--sunset-orange);
+        color: var(--text-color);
+      }
+
+      .navbar-brand {
+        color: var(--text-color) !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .navbar-brand i {
+        color: var(--sunset-yellow);
+      }
+
+      .theme-toggle {
+        position: relative;
+        margin-left: 1rem;
+      }
+
+      .theme-toggle-btn {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .theme-toggle-btn:hover {
+        opacity: 0.8;
+      }
+
+      .theme-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem;
+        min-width: 150px;
+        display: none;
+        z-index: 1000;
+      }
+
+      .theme-menu.show {
+        display: block;
+      }
+
+      .theme-option {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+      }
+
+      .theme-option:hover {
+        background: var(--hover-color);
+      }
+
+      .theme-option i {
+        margin-right: 0.5rem;
+        width: 20px;
+      }
+
+      .theme-option.active {
+        color: var(--sunset-orange);
+      }
+
+      .metric-card {
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .metric-card:hover {
+        background: var(--hover-color);
+      }
+
+      .chart-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .control-panel {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+      }
+
+      .copy-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        display: none;
+      }
+
+      /* Download button styles */
+      .download-dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .download-btn {
+        background: linear-gradient(
+          135deg,
+          var(--sunset-orange),
+          var(--sunset-yellow)
+        );
+        border: none;
+        color: var(--dark-blue);
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 126, 95, 0.3);
+      }
+
+      .download-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.5rem;
+        min-width: 200px;
+        display: none;
+        z-index: 1000;
+      }
+
+      .download-menu.show {
+        display: block;
+      }
+
+      .download-option {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .download-option:hover {
+        background: var(--hover-color);
+      }
+
+      .download-option i {
+        margin-right: 0.5rem;
+        width: 20px;
+      }
+
+      .view-selector {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .view-option {
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+
+      .view-option.active {
+        background: linear-gradient(
+          135deg,
+          var(--sunset-orange),
+          var(--sunset-yellow)
+        );
+        color: var(--dark-blue);
+        font-weight: 600;
+      }
+
+      .view-option:hover:not(.active) {
+        border-color: var(--sunset-orange);
+      }
+
+      .dashboard-section {
+        display: none;
+      }
+
+      .dashboard-section.active {
+        display: block;
+      }
+
+      .analysis-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+      }
+
+      .analysis-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--sunset-yellow);
+      }
+
+      .analysis-label {
+        color: var(--text-color);
+        opacity: 0.8;
+      }
+
+      .trend-indicator {
+        font-size: 1.2rem;
+        margin-left: 10px;
+      }
+
+      .trend-up {
+        color: #4caf50;
+      }
+
+      .trend-down {
+        color: #f44336;
+      }
+
+      .control-card {
+        background: var(--card-bg);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+      }
+
+      .control-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .control-status {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+      }
+
+      .status-active {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+      }
+
+      .status-inactive {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+      }
+
+      .admin-view-toggle {
+        position: fixed;
+        top: 140px;
+        right: 20px;
+        z-index: 1030;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar-brand img {
+        height: 40px;
+        width: auto;
+        margin-right: 10px;
+      }
+
+      .control-card,
+      .metric-card,
+      .analysis-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .control-card:hover,
+      .metric-card:hover,
+      .analysis-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .workspace-portable-toggle {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .workspace-portable-toggle .btn-group {
+        width: 100%;
+      }
+
+      .workspace-portable-toggle .btn {
+        flex: 1;
+        padding: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .workspace-portable-toggle .btn.active {
+        background: linear-gradient(
+          135deg,
+          var(--sunset-orange),
+          var(--sunset-yellow)
+        );
+        border: none;
+        color: var(--dark-blue);
+      }
+    </style>
+  </head>
+  <body class="light-theme">
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+          <img
+            src="{{ url_for('static', filename='images/gocity.png') }}"
+            alt="Energy Management System Logo"
+            class="logo"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('dashboard') }}"
+                >Dashboard</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="refreshData"
+                ><i class="fas fa-sync-alt"></i> Refresh</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}"
+                ><i class="fas fa-sign-out-alt"></i> Logout</a
+              >
+            </li>
+            <li class="nav-item theme-toggle">
+              <button class="theme-toggle-btn" id="themeToggle">
+                <i class="fas fa-sun"></i>
+              </button>
+              <div class="theme-menu" id="themeMenu">
+                <div class="theme-option" data-theme="light">
+                  <i class="fas fa-sun"></i>
+                  Light
+                </div>
+                <div class="theme-option" data-theme="dark">
+                  <i class="fas fa-moon"></i>
+                  Dark
+                </div>
+                <div class="theme-option" data-theme="system">
+                  <i class="fas fa-desktop"></i>
+                  System
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-4">
+      {% if session.get('role') == 'admin' %}
+      <div class="workspace-portable-toggle">
+        <div class="row align-items-center">
+          <div class="col-md-3">
+            <h5 class="mb-0">View Mode:</h5>
+          </div>
+          <div class="col-md-9">
+            <div class="btn-group w-100">
+              <button
+                class="btn btn-outline-primary active"
+                onclick="setAdminView('workspace')"
+                id="workspace-btn"
+              >
+                <i class="bi bi-building"></i> Workspace Power
+              </button>
+              <button
+                class="btn btn-outline-primary"
+                onclick="setAdminView('portable')"
+                id="portable-btn"
+              >
+                <i class="bi bi-battery-charging"></i> Portable Power Packs
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- View Selector -->
+      <div class="view-selector mb-4">
+        <div class="row">
+          <div class="col-12">
+            <div class="btn-group w-100">
+              <button
+                class="btn btn-outline-primary view-option active"
+                data-view="control"
+              >
+                <i class="fas fa-sliders-h"></i> Control
+              </button>
+              <button
+                class="btn btn-outline-primary view-option"
+                data-view="analyze"
+              >
+                <i class="fas fa-chart-bar"></i> Analyze
+              </button>
+              <button
+                class="btn btn-outline-primary view-option"
+                data-view="visualize"
+              >
+                <i class="fas fa-chart-line"></i> Visualize
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workspace View -->
+      <div id="workspaceView" class="view-section active">
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Workspace Overview</h5>
+                <div class="row">
+                  {% for location in workspace_locations %}
+                  <div class="col-md-6 mb-3">
+                    <div class="location-card">
+                      <h6>{{ location.name }}</h6>
+                      <p class="text-muted">{{ location.address }}</p>
+                      <div class="d-flex justify-content-between">
+                        <span
+                          >Current Usage: {{ location.current_usage }}W</span
+                        >
+                        <span>Capacity: {{ location.power_capacity }}W</span>
+                      </div>
+                      <div class="progress mt-2">
+                        <div
+                          class="progress-bar"
+                          role="progressbar"
+                          style="width: {{ (location.current_usage / location.power_capacity) * 100 }}%"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portable Power Pack View -->
+      <div id="portableView" class="view-section">
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Portable Power Packs</h5>
+                <div class="row">
+                  {% for pack in power_packs %}
+                  <div class="col-md-4 mb-3">
+                    <div class="power-pack-card">
+                      <h6>{{ pack.assigned_to }}</h6>
+                      <p class="text-muted">ID: {{ pack.id }}</p>
+                      <div class="d-flex justify-content-between">
+                        <span>Usage: {{ pack.current_usage }}W</span>
+                        <span>Battery: {{ pack.battery_level }}%</span>
+                      </div>
+                      <div class="progress mt-2">
+                        <div
+                          class="progress-bar bg-{{ 'success' if pack.battery_level > 80 else 'warning' if pack.battery_level > 50 else 'danger' }}"
+                          role="progressbar"
+                          style="width: {{ pack.battery_level }}%"
+                        ></div>
+                      </div>
+                      <div class="mt-2">
+                        <span
+                          class="badge bg-{{ 'success' if pack.status == 'Active' else 'secondary' }}"
+                        >
+                          {{ pack.status }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Control Section -->
+      <div class="dashboard-section active" id="controlSection">
+        <!-- Metrics Row -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="metric-card">
+              <i
+                class="fas fa-bolt fa-2x"
+                style="color: var(--sunset-yellow)"
+              ></i>
+              <div class="metric-value" id="currentPower">0 kW</div>
+              <div class="metric-label">Current Power Usage</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="metric-card">
+              <i
+                class="fas fa-percentage fa-2x"
+                style="color: var(--sunset-yellow)"
+              ></i>
+              <div class="metric-value" id="efficiency">0%</div>
+              <div class="metric-label">System Efficiency</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="metric-card">
+              <i
+                class="fas fa-chart-line fa-2x"
+                style="color: var(--sunset-yellow)"
+              ></i>
+              <div class="metric-value" id="utilization">0%</div>
+              <div class="metric-label">Capacity Utilization</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="metric-card">
+              <i
+                class="fas fa-map-marker-alt fa-2x"
+                style="color: var(--sunset-yellow)"
+              ></i>
+              <div class="metric-value" id="activeCount">0</div>
+              <div class="metric-label" id="activeLabel">Active Locations</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Cards -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="control-card">
+              <div class="control-header">
+                <h5>Time-Based Control</h5>
+                <span class="control-status status-active">Active</span>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Runtime Hours</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="runtimeHours"
+                  min="0"
+                  max="24"
+                />
+              </div>
+              <button class="btn btn-control" onclick="setTimeControl()">
+                <i class="fas fa-clock"></i> Set Timer
+              </button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="control-card">
+              <div class="control-header">
+                <h5>Wattage-Based Control</h5>
+                <span class="control-status status-inactive">Inactive</span>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Maximum Wattage</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="maxWattage"
+                  min="0"
+                />
+              </div>
+              <button class="btn btn-control" onclick="setWattageControl()">
+                <i class="fas fa-bolt"></i> Set Limit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Section -->
+      <div class="dashboard-section" id="analyzeSection">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="analysis-card">
+              <h5>Efficiency Score</h5>
+              <div class="analysis-value">
+                85%
+                <span class="trend-indicator trend-up">
+                  <i class="fas fa-arrow-up"></i> 5%
+                </span>
+              </div>
+              <div class="analysis-label">Based on last 30 days</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="analysis-card">
+              <h5>Cost Savings</h5>
+              <div class="analysis-value">
+                $1,250
+                <span class="trend-indicator trend-up">
+                  <i class="fas fa-arrow-up"></i> $200
+                </span>
+              </div>
+              <div class="analysis-label">Monthly comparison</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="analysis-card">
+              <h5>Peak Hours</h5>
+              <div class="analysis-value">14:00 - 16:00</div>
+              <div class="analysis-label">Highest consumption period</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="analysis-card">
+              <h5>Average Load</h5>
+              <div class="analysis-value">
+                75%
+                <span class="trend-indicator trend-down">
+                  <i class="fas fa-arrow-down"></i> 3%
+                </span>
+              </div>
+              <div class="analysis-label">System utilization</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="analysis-card">
+              <h5>Carbon Footprint</h5>
+              <div class="analysis-value">
+                -15%
+                <span class="trend-indicator trend-up">
+                  <i class="fas fa-arrow-up"></i> Good
+                </span>
+              </div>
+              <div class="analysis-label">Compared to baseline</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization Section -->
+      <div class="dashboard-section" id="visualizeSection">
+        <div class="row mb-4">
+          <div class="col-12 d-flex justify-content-end">
+            <div class="download-dropdown">
+              <button class="download-btn" id="downloadToggle">
+                <i class="fas fa-download"></i> Download Data
+              </button>
+              <div class="download-menu" id="downloadMenu">
+                <a href="#" class="download-option" data-format="pdf">
+                  <i class="fas fa-file-pdf"></i> Download PDF
+                </a>
+                <a href="#" class="download-option" data-format="csv">
+                  <i class="fas fa-file-csv"></i> Download CSV
+                </a>
+                <a href="#" class="download-option" data-format="excel">
+                  <i class="fas fa-file-excel"></i> Download Excel
+                </a>
+                <a href="#" class="download-option" data-format="png">
+                  <i class="fas fa-file-image"></i> Download Picture
+                </a>
+                <a href="#" class="download-option" data-format="json">
+                  <i class="fas fa-file-code"></i> Download Visual Data
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card">
+              <h5>Power Consumption Trend</h5>
+              <div id="consumptionChart"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <h5>Device Distribution</h5>
+              <div id="deviceChart"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="card">
+              <h5>Location Analysis</h5>
+              <div id="locationChart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize charts
+      let consumptionChart, deviceChart, locationChart;
+
+      // Format numbers with units
+      function formatNumber(value, unit) {
+        return `${Number(value).toFixed(2)} ${unit}`;
+      }
+
+      // Update metrics based on view mode
+      function updateMetrics(viewMode) {
+        if (viewMode === "workspace") {
+          const totalUsage = workspaceData.locations.reduce(
+            (sum, loc) => sum + loc.current_usage,
+            0
+          );
+          const totalCapacity = workspaceData.locations.reduce(
+            (sum, loc) => sum + loc.power_capacity,
+            0
+          );
+          const avgEfficiency =
+            workspaceData.locations.reduce(
+              (sum, loc) => sum + loc.efficiency,
+              0
+            ) / workspaceData.locations.length;
+
+          document.getElementById("currentPower").textContent = `${(
+            totalUsage / 1000
+          ).toFixed(1)} MW`;
+          document.getElementById(
+            "efficiency"
+          ).textContent = `${avgEfficiency.toFixed(1)}%`;
+          document.getElementById("utilization").textContent = `${(
+            (totalUsage / totalCapacity) *
+            100
+          ).toFixed(1)}%`;
+          document.getElementById("activeCount").textContent =
+            workspaceData.locations.length;
+          document.getElementById("activeLabel").textContent =
+            "Active Locations";
+        } else {
+          const activePacks = portableData.power_packs.filter(
+            (p) => p.status === "Active"
+          );
+          const avgBattery =
+            activePacks.reduce((sum, pack) => sum + pack.battery_level, 0) /
+            activePacks.length;
+          const totalUsage = activePacks.reduce(
+            (sum, pack) => sum + pack.current_usage,
+            0
+          );
+
+          document.getElementById("currentPower").textContent = `${(
+            totalUsage / 1000
+          ).toFixed(1)} kW`;
+          document.getElementById(
+            "efficiency"
+          ).textContent = `${avgBattery.toFixed(1)}%`;
+          document.getElementById("utilization").textContent = `${(
+            (totalUsage / (activePacks.length * 5000)) *
+            100
+          ).toFixed(1)}%`;
+          document.getElementById("activeCount").textContent =
+            activePacks.length;
+          document.getElementById("activeLabel").textContent =
+            "Active Power Packs";
+        }
+      }
+
+      // Initialize charts
+      function initCharts() {
+        // Consumption over time chart
+        const consumptionTrace = {
+          type: "scatter",
+          mode: "lines",
+          name: "Power Consumption",
+          x: [],
+          y: [],
+          line: { color: "#ff7e5f" },
+        };
+
+        const consumptionLayout = {
+          title: "Power Consumption Over Time",
+          paper_bgcolor: "rgba(0,0,0,0)",
+          plot_bgcolor: "rgba(0,0,0,0)",
+          xaxis: {
+            title: "Time",
+            gridcolor: "rgba(128,128,128,0.2)",
+            zerolinecolor: "rgba(128,128,128,0.2)",
+          },
+          yaxis: {
+            title: "Power (kW)",
+            gridcolor: "rgba(128,128,128,0.2)",
+            zerolinecolor: "rgba(128,128,128,0.2)",
+          },
+          margin: { t: 40, l: 60, r: 40, b: 60 },
+        };
+
+        consumptionChart = Plotly.newPlot(
+          "consumptionChart",
+          [consumptionTrace],
+          consumptionLayout,
+          { responsive: true }
+        );
+
+        // Device distribution chart
+        const deviceTrace = {
+          type: "pie",
+          labels: [],
+          values: [],
+          hole: 0.4,
+          marker: {
+            colors: ["#ff7e5f", "#feb47b", "#ff9a9e"],
+          },
+        };
+
+        const deviceLayout = {
+          title: "Device Distribution",
+          paper_bgcolor: "rgba(0,0,0,0)",
+          plot_bgcolor: "rgba(0,0,0,0)",
+          margin: { t: 40, l: 40, r: 40, b: 40 },
+        };
+
+        deviceChart = Plotly.newPlot(
+          "deviceChart",
+          [deviceTrace],
+          deviceLayout,
+          { responsive: true }
+        );
+
+        // Location analysis chart
+        const locationTrace = {
+          type: "bar",
+          x: [],
+          y: [],
+          marker: {
+            color: "#feb47b",
+          },
+        };
+
+        const locationLayout = {
+          title: "Consumption by Location",
+          paper_bgcolor: "rgba(0,0,0,0)",
+          plot_bgcolor: "rgba(0,0,0,0)",
+          xaxis: {
+            title: "Location",
+            gridcolor: "rgba(128,128,128,0.2)",
+            zerolinecolor: "rgba(128,128,128,0.2)",
+          },
+          yaxis: {
+            title: "Consumption (kWh)",
+            gridcolor: "rgba(128,128,128,0.2)",
+            zerolinecolor: "rgba(128,128,128,0.2)",
+          },
+          margin: { t: 40, l: 60, r: 40, b: 100 },
+        };
+
+        locationChart = Plotly.newPlot(
+          "locationChart",
+          [locationTrace],
+          locationLayout,
+          { responsive: true }
+        );
+      }
+
+      // Update charts with new data
+      function updateCharts(data) {
+        if (!data.consumptions || !data.consumptions.length) return;
+
+        // Update consumption chart
+        const timestamps = data.consumptions.map((c) => new Date(c.timestamp));
+        const values = data.consumptions.map((c) => c.value);
+
+        Plotly.update("consumptionChart", {
+          x: [timestamps],
+          y: [values],
+        });
+
+        // Update device distribution chart
+        const deviceCounts = data.controls.reduce((acc, curr) => {
+          acc[curr.mode] = (acc[curr.mode] || 0) + 1;
+          return acc;
+        }, {});
+
+        Plotly.update("deviceChart", {
+          labels: [Object.keys(deviceCounts)],
+          values: [Object.values(deviceCounts)],
+        });
+
+        // Update location analysis chart
+        const locationData = data.consumptions.reduce((acc, curr) => {
+          acc[curr.location] = (acc[curr.location] || 0) + curr.consumption;
+          return acc;
+        }, {});
+
+        Plotly.update("locationChart", {
+          x: [Object.keys(locationData)],
+          y: [Object.values(locationData)],
+        });
+      }
+
+      // Fetch and update data
+      async function updateData() {
+        try {
+          const response = await fetch("/api/real-time-data");
+          if (!response.ok) throw new Error("Failed to fetch data");
+
+          const data = await response.json();
+          updateMetrics(data.view_mode);
+          updateCharts(data);
+        } catch (error) {
+          console.error("Error updating data:", error);
+        }
+      }
+
+      // Download functionality
+      const downloadToggle = document.getElementById("downloadToggle");
+      const downloadMenu = document.getElementById("downloadMenu");
+      const downloadOptions = document.querySelectorAll(".download-option");
+
+      // Toggle download menu
+      downloadToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        downloadMenu.classList.toggle("show");
+      });
+
+      // Close download menu when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          !downloadToggle.contains(e.target) &&
+          !downloadMenu.contains(e.target)
+        ) {
+          downloadMenu.classList.remove("show");
+        }
+      });
+
+      // Handle download options
+      downloadOptions.forEach((option) => {
+        option.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const format = option.dataset.format;
+
+          try {
+            if (format === "png") {
+              // Download charts as PNG
+              const charts = document.querySelectorAll('[id*="Chart"]');
+              charts.forEach((chart) => {
+                Plotly.downloadImage(chart, {
+                  format: "png",
+                  filename: `${chart.id}_${
+                    new Date().toISOString().split("T")[0]
+                  }`,
+                });
+              });
+            } else {
+              // Download data file
+              const response = await fetch(`/api/download/${format}`);
+              if (!response.ok) throw new Error("Download failed");
+
+              if (format === "json") {
+                const data = await response.json();
+                downloadFile(
+                  JSON.stringify(data, null, 2),
+                  `energy_data_${new Date().toISOString().split("T")[0]}.json`,
+                  "application/json"
+                );
+              } else {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `energy_data_${
+                  new Date().toISOString().split("T")[0]
+                }.${format}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+              }
+            }
+
+            downloadMenu.classList.remove("show");
+          } catch (error) {
+            console.error("Error downloading data:", error);
+            alert("Error downloading data");
+          }
+        });
+      });
+
+      // Helper function to download file
+      function downloadFile(content, filename, contentType) {
+        const blob = new Blob([content], { type: contentType });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+
+      // View switching functionality
+      const viewOptions = document.querySelectorAll(".view-option");
+      const dashboardSections = document.querySelectorAll(".dashboard-section");
+
+      viewOptions.forEach((option) => {
+        option.addEventListener("click", () => {
+          const view = option.dataset.view;
+
+          // Update active option
+          viewOptions.forEach((opt) => opt.classList.remove("active"));
+          option.classList.add("active");
+
+          // Show selected section
+          dashboardSections.forEach((section) => {
+            section.classList.remove("active");
+            if (section.id === `${view}Section`) {
+              section.classList.add("active");
+            }
+          });
+
+          // Update charts if showing visualization section
+          if (view === "visualize") {
+            updateData();
+          }
+        });
+      });
+
+      // Mock data for analysis
+      const mockAnalysisData = {
+        efficiency: {
+          current: 85,
+          trend: 5,
+          positive: true,
+        },
+        savings: {
+          amount: 1250,
+          trend: 200,
+          positive: true,
+        },
+        peakHours: "14:00 - 16:00",
+        averageLoad: {
+          current: 75,
+          trend: 3,
+          positive: false,
+        },
+        carbonFootprint: {
+          reduction: 15,
+          status: "Good",
+          positive: true,
+        },
+      };
+
+      // Control functions
+      function setTimeControl() {
+        const hours = document.getElementById("runtimeHours").value;
+        if (hours < 0 || hours > 24) {
+          alert("Please enter valid hours (0-24)");
+          return;
+        }
+
+        fetch("/api/set-control", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: "time",
+            value: hours,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              alert("Time control set successfully");
+              updateData();
+            } else {
+              throw new Error(data.error || "Failed to set time control");
+            }
+          })
+          .catch((error) => {
+            console.error("Error setting time control:", error);
+            alert("Error setting time control");
+          });
+      }
+
+      function setWattageControl() {
+        const wattage = document.getElementById("maxWattage").value;
+        if (wattage < 0) {
+          alert("Please enter a valid wattage value");
+          return;
+        }
+
+        fetch("/api/set-control", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mode: "wattage",
+            value: wattage,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              alert("Wattage control set successfully");
+              updateData();
+            } else {
+              throw new Error(data.error || "Failed to set wattage control");
+            }
+          })
+          .catch((error) => {
+            console.error("Error setting wattage control:", error);
+            alert("Error setting wattage control");
+          });
+      }
+
+      // Theme management
+      const html = document.documentElement;
+      const themeToggle = document.getElementById("themeToggle");
+      const themeMenu = document.getElementById("themeMenu");
+      const themeOptions = document.querySelectorAll(".theme-option");
+
+      // Load theme
+      async function loadTheme() {
+        try {
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme) {
+            setTheme(savedTheme);
+          } else {
+            const response = await fetch("/api/get-theme");
+            if (!response.ok) throw new Error("Failed to fetch theme");
+            const data = await response.json();
+            setTheme(data.theme || "system");
+          }
+        } catch (error) {
+          console.error("Error loading theme:", error);
+          setTheme("system");
+        }
+      }
+
+      // Set theme
+      function setTheme(theme) {
+        html.setAttribute("data-theme", theme);
+        localStorage.setItem("theme", theme);
+        updateThemeIcon(theme);
+        updateActiveTheme(theme);
+        updateChartsTheme();
+
+        // Save theme preference to server
+        fetch("/api/set-theme", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ theme }),
+        }).catch((error) => console.error("Error saving theme:", error));
+      }
+
+      // Update theme icon
+      function updateThemeIcon(theme) {
+        const icon = themeToggle.querySelector("i");
+        icon.className =
+          theme === "dark"
+            ? "fas fa-moon"
+            : theme === "light"
+            ? "fas fa-sun"
+            : "fas fa-desktop";
+      }
+
+      // Update active theme in menu
+      function updateActiveTheme(theme) {
+        themeOptions.forEach((option) => {
+          option.classList.toggle("active", option.dataset.theme === theme);
+        });
+      }
+
+      // Update charts theme
+      function updateChartsTheme() {
+        const theme = html.getAttribute("data-theme");
+        const isDark =
+          theme === "dark" ||
+          (theme === "system" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+        const layout = {
+          paper_bgcolor: isDark ? "rgba(0,0,0,0)" : "#ffffff",
+          plot_bgcolor: isDark ? "rgba(0,0,0,0)" : "#ffffff",
+          font: {
+            color: isDark ? "#ffffff" : "#1a2b4c",
+          },
+          xaxis: {
+            gridcolor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+            zerolinecolor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+          },
+          yaxis: {
+            gridcolor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+            zerolinecolor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+          },
+        };
+
+        ["consumptionChart", "deviceChart", "locationChart"].forEach(
+          (chartId) => {
+            Plotly.relayout(chartId, layout).catch((error) =>
+              console.error(`Error updating ${chartId} theme:`, error)
+            );
+          }
+        );
+      }
+
+      // Theme toggle events
+      themeToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        themeMenu.classList.toggle("show");
+      });
+
+      // Handle theme selection
+      themeOptions.forEach((option) => {
+        option.addEventListener("click", () => {
+          const theme = option.dataset.theme;
+          setTheme(theme);
+          themeMenu.classList.remove("show");
+        });
+      });
+
+      // Close theme menu when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!themeToggle.contains(e.target) && !themeMenu.contains(e.target)) {
+          themeMenu.classList.remove("show");
+        }
+      });
+
+      // Watch for system theme changes
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", () => {
+          if (html.getAttribute("data-theme") === "system") {
+            updateChartsTheme();
+          }
+        });
+
+      // Initialize theme and charts
+      document.addEventListener("DOMContentLoaded", () => {
+        loadTheme();
+        initCharts();
+        updateData();
+        setInterval(updateData, 5000);
+      });
+
+      // Refresh button functionality
+      document.getElementById("refreshData").addEventListener("click", (e) => {
+        e.preventDefault();
+        updateData();
+      });
+
+      // Admin View Toggle
+      const originalSetAdminView = setAdminView;
+      setAdminView = function (mode) {
+        originalSetAdminView(mode);
+        updateMetrics(mode);
+      };
+
+      // Mock data for workspaces
+      const workspaceData = {
+        locations: [
+          {
+            name: "Lagos Office Complex",
+            address: "Victoria Island, Lagos",
+            power_capacity: 25000,
+            current_usage: 18500,
+            devices: ["INV001", "INV002", "INV003"],
+            efficiency: 92,
+          },
+          {
+            name: "Abuja Headquarters",
+            address: "Central Business District, Abuja",
+            power_capacity: 30000,
+            current_usage: 22000,
+            devices: ["INV004", "INV005", "INV006"],
+            efficiency: 88,
+          },
+          {
+            name: "Port Harcourt Branch",
+            address: "GRA Phase 2, Port Harcourt",
+            power_capacity: 20000,
+            current_usage: 15000,
+            devices: ["INV007", "INV008"],
+            efficiency: 95,
+          },
+          {
+            name: "Kano Regional Office",
+            address: "Nassarawa GRA, Kano",
+            power_capacity: 18000,
+            current_usage: 12000,
+            devices: ["INV009", "INV010"],
+            efficiency: 90,
+          },
+        ],
+      };
+
+      // Mock data for portable power packs
+      const portableData = {
+        power_packs: [
+          {
+            id: "PP001",
+            assigned_to: "John Doe",
+            location: "Field Site A",
+            capacity: 5000,
+            current_usage: 3200,
+            battery_level: 85,
+            status: "Active",
+          },
+          {
+            id: "PP002",
+            assigned_to: "Jane Smith",
+            location: "Field Site B",
+            capacity: 5000,
+            current_usage: 4100,
+            battery_level: 65,
+            status: "Active",
+          },
+          {
+            id: "PP003",
+            assigned_to: "Mike Johnson",
+            location: "Field Site C",
+            capacity: 5000,
+            current_usage: 2800,
+            battery_level: 92,
+            status: "Active",
+          },
+        ],
+      };
+
+      // Update charts with mock data
+      function updateChartsWithMockData(viewMode) {
+        const data = viewMode === "workspace" ? workspaceData : portableData;
+
+        if (viewMode === "workspace") {
+          // Update consumption chart
+          const consumptionTrace = {
+            x: workspaceData.locations.map((l) => l.name),
+            y: workspaceData.locations.map((l) => l.current_usage),
+            type: "bar",
+            name: "Current Usage",
+            marker: {
+              color: "#ff7e5f",
+            },
+          };
+
+          const capacityTrace = {
+            x: workspaceData.locations.map((l) => l.name),
+            y: workspaceData.locations.map((l) => l.power_capacity),
+            type: "bar",
+            name: "Total Capacity",
+            marker: {
+              color: "#feb47b",
+            },
+          };
+
+          Plotly.newPlot(
+            "consumptionChart",
+            [consumptionTrace, capacityTrace],
+            {
+              title: "Power Usage by Location",
+              barmode: "group",
+              paper_bgcolor: "rgba(0,0,0,0)",
+              plot_bgcolor: "rgba(0,0,0,0)",
+            }
+          );
+        } else {
+          // Update portable power pack chart
+          const batteryTrace = {
+            x: portableData.power_packs.map((p) => p.assigned_to),
+            y: portableData.power_packs.map((p) => p.battery_level),
+            type: "bar",
+            name: "Battery Level",
+            marker: {
+              color: portableData.power_packs.map((p) =>
+                p.battery_level > 80
+                  ? "#4caf50"
+                  : p.battery_level > 50
+                  ? "#ff9800"
+                  : "#f44336"
+              ),
+            },
+          };
+
+          Plotly.newPlot("consumptionChart", [batteryTrace], {
+            title: "Portable Power Pack Status",
+            paper_bgcolor: "rgba(0,0,0,0)",
+            plot_bgcolor: "rgba(0,0,0,0)",
+          });
+        }
+      }
+
+      // Initialize with mock data
+      document.addEventListener("DOMContentLoaded", () => {
+        if (document.getElementById("workspace-btn")) {
+          setAdminView("workspace");
+        }
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
