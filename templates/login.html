@@ -159,6 +159,12 @@
         justify-content: center;
       }
 
+      .logo-img {
+        width: 100%;
+        height: auto;
+        filter: brightness(0) invert(1);
+      }
+
       .logo i {
         font-size: 50px;
         color: var(--sunset-pink);
@@ -233,14 +239,22 @@
 
     <div class="login-container">
       <div class="logo">
-        <i class="fas fa-bolt"></i>
+        <img
+          src="{{ url_for('static', filename='images/gocity.png') }}"
+          alt="Energy Management System Logo"
+          class="logo-img"
+        />
       </div>
       <div class="login-header">
         <h1>Welcome Back</h1>
         <p>Sign in to your account</p>
       </div>
 
-      <div class="error-message" id="errorMessage">
+      <div
+        class="error-message"
+        id="errorMessage"
+        data-has-flash="{{ 'true' if get_flashed_messages() else 'false' }}"
+      >
         <i class="fas fa-exclamation-circle me-2"></i>
         <span>Invalid username or password</span>
       </div>
@@ -278,24 +292,25 @@
 
     <script>
       // Handle flash messages from Flask
-      const errorMessage = document.getElementById('errorMessage');
+      const errorMessage = document.getElementById("errorMessage");
+      const hasFlashMessages = errorMessage.dataset.hasFlash === "true";
 
-      // Check if there are any flash messages
-      const hasFlashMessages = {% if get_flashed_messages() %}true{% else %}false{% endif %};
       if (hasFlashMessages) {
-        errorMessage.classList.add('show');
+        errorMessage.classList.add("show");
       }
 
       // Form validation
-      document.getElementById('loginForm').addEventListener('submit', function(e) {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (e) {
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
 
-        if (!username || !password) {
-          e.preventDefault();
-          errorMessage.classList.add('show');
-        }
-      });
+          if (!username || !password) {
+            e.preventDefault();
+            errorMessage.classList.add("show");
+          }
+        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

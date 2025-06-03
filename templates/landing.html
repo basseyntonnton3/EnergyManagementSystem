@@ -27,6 +27,7 @@
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
+        padding-top: 40px;
       }
 
       body::before {
@@ -41,7 +42,7 @@
           rgba(26, 43, 76, 0.7),
           rgba(44, 72, 112, 0.8)
         );
-        z-index: 0;
+        z-index: 1;
       }
 
       .navbar {
@@ -49,7 +50,7 @@
         backdrop-filter: blur(10px);
         padding: 1rem 2rem;
         position: relative;
-        z-index: 1;
+        z-index: 2;
       }
 
       .navbar-brand {
@@ -58,6 +59,18 @@
         display: flex;
         align-items: center;
         gap: 10px;
+      }
+
+      .logo {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        transition: all 0.3s ease;
+      }
+
+      .logo:hover {
+        filter: brightness(0) invert(0.8);
       }
 
       .navbar-brand i {
@@ -82,7 +95,7 @@
         justify-content: center;
         color: white;
         text-align: center;
-        z-index: 1;
+        z-index: 2;
       }
 
       .content {
@@ -190,6 +203,507 @@
           width: 100%;
         }
       }
+
+      .city-selector {
+        max-width: 300px;
+        margin: 0 auto;
+      }
+
+      .custom-location {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .location-selector {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .location-selector label {
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        display: block;
+        opacity: 0.9;
+      }
+
+      .country-select {
+        margin-bottom: 15px;
+      }
+
+      .country-select select {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(26, 43, 76, 0.3);
+        color: var(--dark-blue);
+        font-size: 1.1rem;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+      }
+
+      .country-select select:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: var(--sunset-orange);
+      }
+
+      .country-select select:focus {
+        background: rgba(255, 255, 255, 1);
+        border-color: var(--sunset-yellow);
+        box-shadow: 0 0 0 2px rgba(254, 180, 123, 0.3);
+        outline: none;
+      }
+
+      .country-select select option {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--dark-blue);
+        padding: 12px;
+        font-size: 1.1rem;
+      }
+
+      .country-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+      }
+
+      .country-flag {
+        width: 24px;
+        height: auto;
+        border-radius: 3px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .city-search-container {
+        position: relative;
+      }
+
+      .city-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(26, 43, 76, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+      }
+
+      .city-suggestions.active {
+        display: block;
+      }
+
+      .city-suggestion {
+        padding: 10px 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+      }
+
+      .city-suggestion:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .city-suggestion .state-name {
+        font-size: 0.8em;
+        opacity: 0.7;
+      }
+
+      .form-select {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(26, 43, 76, 0.3);
+        color: var(--dark-blue);
+        font-size: 1.1rem;
+        padding: 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+      }
+
+      .form-select:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: var(--sunset-orange);
+      }
+
+      .form-select:focus {
+        background: rgba(255, 255, 255, 1);
+        border-color: var(--sunset-yellow);
+        box-shadow: 0 0 0 2px rgba(254, 180, 123, 0.3);
+        outline: none;
+      }
+
+      .form-select option {
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--dark-blue);
+        padding: 12px;
+        font-size: 1.1rem;
+      }
+
+      .btn-primary {
+        background: var(--sunset-orange);
+        border-color: var(--sunset-orange);
+      }
+
+      .btn-primary:hover {
+        background: var(--sunset-yellow);
+        border-color: var(--sunset-yellow);
+      }
+
+      .error-message {
+        color: #ff4444;
+        background: rgba(255, 68, 68, 0.1);
+        border: 1px solid rgba(255, 68, 68, 0.3);
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #realtime-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 9999;
+        background: rgba(26, 43, 76, 0.95);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 0;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        letter-spacing: 0.5px;
+        gap: 20px;
+      }
+      .status-dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #00e676;
+        margin-right: 10px;
+        box-shadow: 0 0 8px #00e67688;
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 8px #00e67688;
+        }
+        50% {
+          box-shadow: 0 0 16px #00e676cc;
+        }
+        100% {
+          box-shadow: 0 0 8px #00e67688;
+        }
+      }
+      .realtime-message {
+        margin-right: 18px;
+        font-weight: 500;
+      }
+      .realtime-clock {
+        font-family: "Segoe UI Mono", "Consolas", monospace;
+        font-size: 1.05em;
+        letter-spacing: 1px;
+      }
+
+      .timezone-selector {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        position: relative;
+        min-width: 300px;
+      }
+
+      .timezone-selector select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        min-width: 300px;
+        backdrop-filter: blur(5px);
+      }
+
+      .timezone-selector select:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--sunset-orange);
+      }
+
+      .timezone-selector select:focus {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: var(--sunset-yellow);
+        box-shadow: 0 0 0 2px rgba(254, 180, 123, 0.3);
+        outline: none;
+      }
+
+      .timezone-selector select option {
+        background: rgba(26, 43, 76, 0.95);
+        color: white;
+        padding: 8px;
+      }
+
+      .timezone-selector select optgroup {
+        background: rgba(26, 43, 76, 0.95);
+        color: var(--sunset-yellow);
+        font-weight: bold;
+        padding: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .timezone-search {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(26, 43, 76, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        padding: 8px;
+        margin-top: 5px;
+        display: none;
+        z-index: 1000;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .timezone-search.active {
+        display: block;
+      }
+
+      .timezone-search input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+
+      .timezone-search input:focus {
+        outline: none;
+        border-color: var(--sunset-yellow);
+      }
+
+      .timezone-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .timezone-continent {
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 5px;
+      }
+
+      .timezone-continent-header {
+        color: var(--sunset-yellow);
+        font-weight: bold;
+        padding: 5px 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        margin-bottom: 5px;
+      }
+
+      .timezone-item {
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .timezone-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .timezone-item.selected {
+        background: var(--sunset-orange);
+        color: white;
+      }
+
+      .timezone-offset {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8em;
+        margin-left: 8px;
+      }
+
+      .features-section {
+        padding: 80px 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 2;
+        margin-top: -76px; /* Adjust for navbar height */
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .feature-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .feature-description {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .benefits-section {
+        padding: 80px 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 2;
+        margin-top: -76px; /* Adjust for navbar height */
+      }
+
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .benefit-icon {
+        font-size: 1.5rem;
+        color: var(--sunset-yellow);
+      }
+
+      .benefit-content {
+        text-align: left;
+      }
+
+      .benefit-content h4 {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .benefit-content p {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .dropdown-submenu {
+        position: relative;
+      }
+      .dropdown-submenu .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -1px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .dropdown-submenu:hover .dropdown-menu {
+        display: block;
+      }
+      .dropdown-submenu .dropdown-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .dropdown-submenu .dropdown-toggle::after {
+        display: inline-block;
+        margin-left: auto;
+        vertical-align: middle;
+        content: "";
+        border-top: 0.3em solid;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0.3em solid;
+        transform: rotate(45deg);
+      }
+      .dropdown-menu {
+        background: rgba(26, 43, 76, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .dropdown-item {
+        color: white;
+      }
+      .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      .country-data-buttons {
+        padding: 5px 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        margin-top: 5px;
+      }
+      .country-data-buttons button {
+        font-size: 0.8rem;
+        padding: 2px 8px;
+      }
+      .data-modal .modal-content {
+        background: rgba(26, 43, 76, 0.95);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .data-modal .modal-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .data-modal .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      .data-modal .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+      }
     </style>
     <link
       rel="stylesheet"
@@ -197,11 +711,20 @@
     />
   </head>
   <body>
+    <!-- Real-Time Bar -->
+    <div id="realtime-bar">
+      <span class="status-dot"></span>
+      <span class="realtime-message">System Online</span>
+    </div>
+
     <nav class="navbar navbar-expand-lg">
       <div class="container">
-        <a class="navbar-brand" href="#">
-          <i class="fas fa-bolt"></i>
-          EnergyMS
+        <a class="navbar-brand" href="{{ url_for('landing') }}">
+          <img
+            src="{{ url_for('static', filename='images/gocity.png') }}"
+            alt="Energy Management System Logo"
+            class="logo"
+          />
         </a>
         <button
           class="navbar-toggler"
@@ -214,13 +737,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#">Home</a>
+              <a class="nav-link" href="{{ url_for('landing') }}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
+              <a class="nav-link" href="{{ url_for('features') }}">Features</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">About Us</a>
+              <a class="nav-link" href="{{ url_for('about') }}">About Us</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('login') }}">Login</a>
@@ -255,19 +778,432 @@
       </div>
 
       <div class="content">
-        <h1 class="animated-text">Smart Energy Management</h1>
+        <h1 class="animated-text">
+          Gocity Group Smart Energy Management System
+        </h1>
         <p class="animated-subtitle typing-text">
           Powering the future with sustainable solutions
         </p>
-        <div class="buttons">
-          <a href="{{ url_for('login') }}" class="btn btn-custom primary"
-            >Get Started</a
+        <div class="dropdown mt-4">
+          <button
+            class="btn btn-custom dropdown-toggle"
+            type="button"
+            id="contentDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
           >
-          <a href="#" class="btn btn-custom">Learn More</a>
+            <i class="fas fa-globe me-1"></i>Select Continent
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="contentDropdown">
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>Africa</a
+              >
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="#">Algeria</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Angola</a></li>
+                <li><a class="dropdown-item" href="#">Benin</a></li>
+                <li><a class="dropdown-item" href="#">Botswana</a></li>
+                <li><a class="dropdown-item" href="#">Burkina Faso</a></li>
+                <li><a class="dropdown-item" href="#">Burundi</a></li>
+                <li><a class="dropdown-item" href="#">Cabo Verde</a></li>
+                <li><a class="dropdown-item" href="#">Cameroon</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">Central African Republic</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Chad</a></li>
+                <li><a class="dropdown-item" href="#">Comoros</a></li>
+                <li><a class="dropdown-item" href="#">Congo</a></li>
+                <li><a class="dropdown-item" href="#">Côte d'Ivoire</a></li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >Democratic Republic of the Congo</a
+                  >
+                </li>
+                <li><a class="dropdown-item" href="#">Djibouti</a></li>
+                <li><a class="dropdown-item" href="#">Egypt</a></li>
+                <li><a class="dropdown-item" href="#">Equatorial Guinea</a></li>
+                <li><a class="dropdown-item" href="#">Eritrea</a></li>
+                <li><a class="dropdown-item" href="#">Eswatini</a></li>
+                <li><a class="dropdown-item" href="#">Ethiopia</a></li>
+                <li><a class="dropdown-item" href="#">Gabon</a></li>
+                <li><a class="dropdown-item" href="#">Gambia</a></li>
+                <li><a class="dropdown-item" href="#">Ghana</a></li>
+                <li><a class="dropdown-item" href="#">Guinea</a></li>
+                <li><a class="dropdown-item" href="#">Guinea-Bissau</a></li>
+                <li><a class="dropdown-item" href="#">Kenya</a></li>
+                <li><a class="dropdown-item" href="#">Lesotho</a></li>
+                <li><a class="dropdown-item" href="#">Liberia</a></li>
+                <li><a class="dropdown-item" href="#">Libya</a></li>
+                <li><a class="dropdown-item" href="#">Madagascar</a></li>
+                <li><a class="dropdown-item" href="#">Malawi</a></li>
+                <li><a class="dropdown-item" href="#">Mali</a></li>
+                <li><a class="dropdown-item" href="#">Mauritania</a></li>
+                <li><a class="dropdown-item" href="#">Mauritius</a></li>
+                <li><a class="dropdown-item" href="#">Morocco</a></li>
+                <li><a class="dropdown-item" href="#">Mozambique</a></li>
+                <li><a class="dropdown-item" href="#">Namibia</a></li>
+                <li><a class="dropdown-item" href="#">Niger</a></li>
+                <li><a class="dropdown-item" href="#">Nigeria</a></li>
+                <li><a class="dropdown-item" href="#">Rwanda</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">São Tomé and Príncipe</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Senegal</a></li>
+                <li><a class="dropdown-item" href="#">Seychelles</a></li>
+                <li><a class="dropdown-item" href="#">Sierra Leone</a></li>
+                <li><a class="dropdown-item" href="#">Somalia</a></li>
+                <li><a class="dropdown-item" href="#">South Africa</a></li>
+                <li><a class="dropdown-item" href="#">South Sudan</a></li>
+                <li><a class="dropdown-item" href="#">Sudan</a></li>
+                <li><a class="dropdown-item" href="#">Tanzania</a></li>
+                <li><a class="dropdown-item" href="#">Togo</a></li>
+                <li><a class="dropdown-item" href="#">Tunisia</a></li>
+                <li><a class="dropdown-item" href="#">Uganda</a></li>
+                <li><a class="dropdown-item" href="#">Zambia</a></li>
+                <li><a class="dropdown-item" href="#">Zimbabwe</a></li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>North America</a
+              >
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="#">Antigua and Barbuda</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Bahamas</a></li>
+                <li><a class="dropdown-item" href="#">Barbados</a></li>
+                <li><a class="dropdown-item" href="#">Belize</a></li>
+                <li><a class="dropdown-item" href="#">Canada</a></li>
+                <li><a class="dropdown-item" href="#">Costa Rica</a></li>
+                <li><a class="dropdown-item" href="#">Cuba</a></li>
+                <li><a class="dropdown-item" href="#">Dominica</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">Dominican Republic</a>
+                </li>
+                <li><a class="dropdown-item" href="#">El Salvador</a></li>
+                <li><a class="dropdown-item" href="#">Grenada</a></li>
+                <li><a class="dropdown-item" href="#">Guatemala</a></li>
+                <li><a class="dropdown-item" href="#">Haiti</a></li>
+                <li><a class="dropdown-item" href="#">Honduras</a></li>
+                <li><a class="dropdown-item" href="#">Jamaica</a></li>
+                <li><a class="dropdown-item" href="#">Mexico</a></li>
+                <li><a class="dropdown-item" href="#">Nicaragua</a></li>
+                <li><a class="dropdown-item" href="#">Panama</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">Saint Kitts and Nevis</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Saint Lucia</a></li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >Saint Vincent and the Grenadines</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">Trinidad and Tobago</a>
+                </li>
+                <li><a class="dropdown-item" href="#">United States</a></li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>South America</a
+              >
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Argentina</a></li>
+                <li><a class="dropdown-item" href="#">Bolivia</a></li>
+                <li><a class="dropdown-item" href="#">Brazil</a></li>
+                <li><a class="dropdown-item" href="#">Chile</a></li>
+                <li><a class="dropdown-item" href="#">Colombia</a></li>
+                <li><a class="dropdown-item" href="#">Ecuador</a></li>
+                <li><a class="dropdown-item" href="#">Guyana</a></li>
+                <li><a class="dropdown-item" href="#">Paraguay</a></li>
+                <li><a class="dropdown-item" href="#">Peru</a></li>
+                <li><a class="dropdown-item" href="#">Suriname</a></li>
+                <li><a class="dropdown-item" href="#">Uruguay</a></li>
+                <li><a class="dropdown-item" href="#">Venezuela</a></li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>Asia</a
+              >
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Afghanistan</a></li>
+                <li><a class="dropdown-item" href="#">Armenia</a></li>
+                <li><a class="dropdown-item" href="#">Azerbaijan</a></li>
+                <li><a class="dropdown-item" href="#">Bahrain</a></li>
+                <li><a class="dropdown-item" href="#">Bangladesh</a></li>
+                <li><a class="dropdown-item" href="#">Bhutan</a></li>
+                <li><a class="dropdown-item" href="#">Brunei</a></li>
+                <li><a class="dropdown-item" href="#">Cambodia</a></li>
+                <li><a class="dropdown-item" href="#">China</a></li>
+                <li><a class="dropdown-item" href="#">Cyprus</a></li>
+                <li><a class="dropdown-item" href="#">Georgia</a></li>
+                <li><a class="dropdown-item" href="#">India</a></li>
+                <li><a class="dropdown-item" href="#">Indonesia</a></li>
+                <li><a class="dropdown-item" href="#">Iran</a></li>
+                <li><a class="dropdown-item" href="#">Iraq</a></li>
+                <li><a class="dropdown-item" href="#">Israel</a></li>
+                <li><a class="dropdown-item" href="#">Japan</a></li>
+                <li><a class="dropdown-item" href="#">Jordan</a></li>
+                <li><a class="dropdown-item" href="#">Kazakhstan</a></li>
+                <li><a class="dropdown-item" href="#">Kuwait</a></li>
+                <li><a class="dropdown-item" href="#">Kyrgyzstan</a></li>
+                <li><a class="dropdown-item" href="#">Laos</a></li>
+                <li><a class="dropdown-item" href="#">Lebanon</a></li>
+                <li><a class="dropdown-item" href="#">Malaysia</a></li>
+                <li><a class="dropdown-item" href="#">Maldives</a></li>
+                <li><a class="dropdown-item" href="#">Mongolia</a></li>
+                <li><a class="dropdown-item" href="#">Myanmar</a></li>
+                <li><a class="dropdown-item" href="#">Nepal</a></li>
+                <li><a class="dropdown-item" href="#">North Korea</a></li>
+                <li><a class="dropdown-item" href="#">Oman</a></li>
+                <li><a class="dropdown-item" href="#">Pakistan</a></li>
+                <li><a class="dropdown-item" href="#">Palestine</a></li>
+                <li><a class="dropdown-item" href="#">Philippines</a></li>
+                <li><a class="dropdown-item" href="#">Qatar</a></li>
+                <li><a class="dropdown-item" href="#">Russia</a></li>
+                <li><a class="dropdown-item" href="#">Saudi Arabia</a></li>
+                <li><a class="dropdown-item" href="#">Singapore</a></li>
+                <li><a class="dropdown-item" href="#">South Korea</a></li>
+                <li><a class="dropdown-item" href="#">Sri Lanka</a></li>
+                <li><a class="dropdown-item" href="#">Syria</a></li>
+                <li><a class="dropdown-item" href="#">Taiwan</a></li>
+                <li><a class="dropdown-item" href="#">Tajikistan</a></li>
+                <li><a class="dropdown-item" href="#">Thailand</a></li>
+                <li><a class="dropdown-item" href="#">Timor-Leste</a></li>
+                <li><a class="dropdown-item" href="#">Turkey</a></li>
+                <li><a class="dropdown-item" href="#">Turkmenistan</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">United Arab Emirates</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Uzbekistan</a></li>
+                <li><a class="dropdown-item" href="#">Vietnam</a></li>
+                <li><a class="dropdown-item" href="#">Yemen</a></li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>Europe</a
+              >
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Albania</a></li>
+                <li><a class="dropdown-item" href="#">Andorra</a></li>
+                <li><a class="dropdown-item" href="#">Austria</a></li>
+                <li><a class="dropdown-item" href="#">Belarus</a></li>
+                <li><a class="dropdown-item" href="#">Belgium</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">Bosnia and Herzegovina</a>
+                </li>
+                <li><a class="dropdown-item" href="#">Bulgaria</a></li>
+                <li><a class="dropdown-item" href="#">Croatia</a></li>
+                <li><a class="dropdown-item" href="#">Czech Republic</a></li>
+                <li><a class="dropdown-item" href="#">Denmark</a></li>
+                <li><a class="dropdown-item" href="#">Estonia</a></li>
+                <li><a class="dropdown-item" href="#">Finland</a></li>
+                <li><a class="dropdown-item" href="#">France</a></li>
+                <li><a class="dropdown-item" href="#">Germany</a></li>
+                <li><a class="dropdown-item" href="#">Greece</a></li>
+                <li><a class="dropdown-item" href="#">Hungary</a></li>
+                <li><a class="dropdown-item" href="#">Iceland</a></li>
+                <li><a class="dropdown-item" href="#">Ireland</a></li>
+                <li><a class="dropdown-item" href="#">Italy</a></li>
+                <li><a class="dropdown-item" href="#">Latvia</a></li>
+                <li><a class="dropdown-item" href="#">Liechtenstein</a></li>
+                <li><a class="dropdown-item" href="#">Lithuania</a></li>
+                <li><a class="dropdown-item" href="#">Luxembourg</a></li>
+                <li><a class="dropdown-item" href="#">Malta</a></li>
+                <li><a class="dropdown-item" href="#">Moldova</a></li>
+                <li><a class="dropdown-item" href="#">Monaco</a></li>
+                <li><a class="dropdown-item" href="#">Montenegro</a></li>
+                <li><a class="dropdown-item" href="#">Netherlands</a></li>
+                <li><a class="dropdown-item" href="#">North Macedonia</a></li>
+                <li><a class="dropdown-item" href="#">Norway</a></li>
+                <li><a class="dropdown-item" href="#">Poland</a></li>
+                <li><a class="dropdown-item" href="#">Portugal</a></li>
+                <li><a class="dropdown-item" href="#">Romania</a></li>
+                <li><a class="dropdown-item" href="#">Russia</a></li>
+                <li><a class="dropdown-item" href="#">San Marino</a></li>
+                <li><a class="dropdown-item" href="#">Serbia</a></li>
+                <li><a class="dropdown-item" href="#">Slovakia</a></li>
+                <li><a class="dropdown-item" href="#">Slovenia</a></li>
+                <li><a class="dropdown-item" href="#">Spain</a></li>
+                <li><a class="dropdown-item" href="#">Sweden</a></li>
+                <li><a class="dropdown-item" href="#">Switzerland</a></li>
+                <li><a class="dropdown-item" href="#">Ukraine</a></li>
+                <li><a class="dropdown-item" href="#">United Kingdom</a></li>
+                <li><a class="dropdown-item" href="#">Vatican City</a></li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>Oceania</a
+              >
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Australia</a></li>
+                <li><a class="dropdown-item" href="#">Fiji</a></li>
+                <li><a class="dropdown-item" href="#">Kiribati</a></li>
+                <li><a class="dropdown-item" href="#">Marshall Islands</a></li>
+                <li><a class="dropdown-item" href="#">Micronesia</a></li>
+                <li><a class="dropdown-item" href="#">Nauru</a></li>
+                <li><a class="dropdown-item" href="#">New Zealand</a></li>
+                <li><a class="dropdown-item" href="#">Palau</a></li>
+                <li><a class="dropdown-item" href="#">Papua New Guinea</a></li>
+                <li><a class="dropdown-item" href="#">Samoa</a></li>
+                <li><a class="dropdown-item" href="#">Solomon Islands</a></li>
+                <li><a class="dropdown-item" href="#">Tonga</a></li>
+                <li><a class="dropdown-item" href="#">Tuvalu</a></li>
+                <li><a class="dropdown-item" href="#">Vanuatu</a></li>
+              </ul>
+            </li>
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#"
+                ><i class="fas fa-map me-2"></i>Antarctica</a
+              >
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="#"
+                    ><strong>Territorial Claims:</strong></a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">France - Adélie Land</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >United Kingdom - British Antarctic Territory</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >New Zealand - Ross Dependency</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">Norway - Peter I Island</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">Norway - Queen Maud Land</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >Australia - Australian Antarctic Territory</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >Chile - Chilean Antarctic Territory</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >Argentina - Argentine Antarctica</a
+                  >
+                </li>
+                <li class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    ><strong>Major Research Stations:</strong></a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">- Amundsen-Scott (USA)</a>
+                </li>
+                <li><a class="dropdown-item" href="#">- McMurdo (USA)</a></li>
+                <li><a class="dropdown-item" href="#">- Vostok (Russia)</a></li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >- Concordia (France/Italy)</a
+                  >
+                </li>
+                <li><a class="dropdown-item" href="#">- Halley (UK)</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">- Davis (Australia)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">- Mawson (Australia)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">- Casey (Australia)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">- Zhongshan (China)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">- Great Wall (China)</a>
+                </li>
+                <li><a class="dropdown-item" href="#">- Bharati (India)</a></li>
+                <li><a class="dropdown-item" href="#">- Maitri (India)</a></li>
+                <li><a class="dropdown-item" href="#">- Showa (Japan)</a></li>
+                <li><a class="dropdown-item" href="#">- Troll (Norway)</a></li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >- SANAE IV (South Africa)</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#">- Neumayer III (Germany)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    >- Princess Elisabeth (Belgium)</a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      function showHistoricalData(country) {
+        const modal = new bootstrap.Modal(document.getElementById("dataModal"));
+        document.getElementById(
+          "modalTitle"
+        ).textContent = `${country} - Historical Data`;
+        document.getElementById("modalBody").innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <h5>Power Generation History</h5>
+              <p>Loading historical power generation data...</p>
+            </div>
+            <div class="col-md-6">
+              <h5>Energy Consumption</h5>
+              <p>Loading consumption trends...</p>
+            </div>
+          </div>
+        `;
+        modal.show();
+        // Here you would typically make an API call to get real data
+      }
+
+      function showRenewableData(country) {
+        const modal = new bootstrap.Modal(document.getElementById("dataModal"));
+        document.getElementById(
+          "modalTitle"
+        ).textContent = `${country} - Renewable Energy`;
+        document.getElementById("modalBody").innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <h5>Renewable Energy Sources</h5>
+              <p>Loading renewable energy data...</p>
+            </div>
+            <div class="col-md-6">
+              <h5>Future Projects</h5>
+              <p>Loading planned renewable projects...</p>
+            </div>
+          </div>
+        `;
+        modal.show();
+        // Here you would typically make an API call to get real data
+      }
+    </script>
   </body>
 </html>

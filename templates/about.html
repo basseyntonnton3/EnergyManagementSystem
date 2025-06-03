@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - Energy Management System</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --dark-blue: #1a2b4c;
+        --medium-blue: #2c4870;
+        --light-blue: #7ab5e3;
+        --sunset-orange: #ff7e5f;
+        --sunset-yellow: #feb47b;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+        background-image: url("https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        padding-top: 40px;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(26, 43, 76, 0.7),
+          rgba(44, 72, 112, 0.8)
+        );
+        z-index: 1;
+      }
+
+      .navbar {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 1rem 2rem;
+        position: relative;
+        z-index: 2;
+      }
+
+      .navbar-brand {
+        color: white !important;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+        transition: all 0.3s ease;
+      }
+
+      .logo:hover {
+        filter: brightness(0) invert(0.8);
+      }
+
+      .nav-link {
+        color: white !important;
+        margin: 0 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link:hover {
+        color: var(--sunset-yellow) !important;
+      }
+
+      .about-section {
+        padding: 80px 0;
+        position: relative;
+        z-index: 2;
+        color: white;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 40px;
+        text-align: center;
+        color: var(--sunset-yellow);
+      }
+
+      .company-description {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .description-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .contact-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .contact-icon {
+        font-size: 1.5rem;
+        color: var(--sunset-yellow);
+      }
+
+      .social-media {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 30px;
+      }
+
+      .social-icon {
+        font-size: 1.8rem;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .social-icon:hover {
+        color: var(--sunset-yellow);
+        transform: translateY(-3px);
+      }
+
+      .team-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .team-member {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .team-member img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 20px;
+        border: 3px solid var(--sunset-yellow);
+      }
+
+      .team-member h4 {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+        color: var(--sunset-yellow);
+      }
+
+      .team-member p {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 10px;
+      }
+
+      .stats-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .stat-item {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--sunset-yellow);
+        margin-bottom: 10px;
+      }
+
+      .stat-label {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('landing') }}">
+          <img
+            src="{{ url_for('static', filename='images/gocity.png') }}"
+            alt="Energy Management System Logo"
+            class="logo"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('landing') }}">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('features') }}">Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('about') }}">About Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="about-section">
+      <div class="container">
+        <h2 class="section-title">About Gocity Group</h2>
+
+        <div class="company-description">
+          <p class="description-text">
+            Gocity Group is a leading provider of smart energy management
+            solutions, dedicated to revolutionizing how businesses and
+            communities manage their energy consumption. Our innovative platform
+            combines cutting-edge technology with sustainable practices to
+            deliver comprehensive energy management solutions that drive
+            efficiency, reduce costs, and minimize environmental impact.
+          </p>
+          <p class="description-text">
+            With a strong focus on renewable energy integration and AI-powered
+            optimization, we help organizations across Nigeria and beyond
+            achieve their sustainability goals while maximizing operational
+            efficiency. Our team of experts works tirelessly to develop and
+            implement customized solutions that address the unique energy
+            challenges of each client.
+          </p>
+        </div>
+
+        <div class="stats-section">
+          <div class="stat-item">
+            <div class="stat-number">100+</div>
+            <div class="stat-label">Businesses Served</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">30%</div>
+            <div class="stat-label">Average Energy Savings</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Monitoring & Support</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Cities Covered</div>
+          </div>
+        </div>
+
+        <div class="contact-section">
+          <h3 class="text-center mb-4">Contact Us</h3>
+          <div class="contact-info">
+            <i class="fas fa-envelope contact-icon"></i>
+            <div>
+              <h5>Email</h5>
+              <p>contact@gocitygroup.org</p>
+            </div>
+          </div>
+          <div class="contact-info">
+            <i class="fas fa-phone contact-icon"></i>
+            <div>
+              <h5>Phone</h5>
+              <p>+234 9013401106</p>
+            </div>
+          </div>
+          <div class="contact-info">
+            <i class="fas fa-map-marker-alt contact-icon"></i>
+            <div>
+              <h5>Address</h5>
+              <p>
+                316 Nnwaniba, Opposite Climate Lorg, Uyo, Akwa Ibom State
+                Nigeria, Africa.
+              </p>
+            </div>
+          </div>
+          <div class="social-media">
+            <a href="https://www.facebook.com/gocitygroup/" class="social-icon"
+              ><i class="fab fa-facebook"></i
+            ></a>
+            <a href="https://x.com/GoCityGroup" class="social-icon"
+              ><i class="fab fa-twitter"></i
+            ></a>
+            <a
+              href="https://www.linkedin.com/company/gocity-group/"
+              class="social-icon"
+              ><i class="fab fa-linkedin"></i
+            ></a>
+            <a href="https://www.instagram.com/gocitygroup/" class="social-icon"
+              ><i class="fab fa-instagram"></i
+            ></a>
+          </div>
+        </div>
+
+        <div class="team-section">
+          <h3 class="text-center mb-4">Our Management Team</h3>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="team-member">
+                <img
+                  src="{{ url_for('static', filename='images/team/Team-photo/Bassey Nton Nton.jpg') }}"
+                  alt="Bassey Nton Nton"
+                />
+                <h4>Bassey Nton Nton</h4>
+                <p>MD & Founder</p>
+                <p class="text-muted">
+                  Visionary leader with 15+ years in Electrical Electronics
+                  Engineering, energy management practice and consultancy.
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="team-member">
+                <img
+                  src="{{ url_for('static', filename='images/team/Team-photo/Anifok Emmanuel.jpg') }}"
+                  alt="Anifok Emmanuel"
+                />
+                <h4>Anifok Emmanuel</h4>
+                <p>CTO</p>
+                <p class="text-muted">
+                  Expert in AI and energy optimization systems
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="team-member">
+                <img
+                  src="{{ url_for('static', filename='images/team/Team-photo/Udo Christopher.jpg') }}"
+                  alt="Udo Christopher"
+                />
+                <h4>Udo Christopher</h4>
+                <p>Head of Operations</p>
+                <p class="text-muted">
+                  Specialized in Hardware and renewable energy integration
+                </p>
+              </div>
+            </div>
+            <center>
+              <div class="col-md-4">
+                <div class="team-member">
+                  <img
+                    src="{{ url_for('static', filename='images/team/Team-photo/monye babatunde.jpg') }}"
+                    alt="Monye Babatunde"
+                  />
+                  <h4>Monye Babatunde</h4>
+                  <p>Cheif Research Officer</p>
+                  <p class="text-muted">CEO of Gocity Group</p>
+                </div>
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

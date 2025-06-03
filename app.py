@@ -8,9 +8,22 @@ import io
 import plotly.utils
 import plotly.io as pio
 from functools import wraps
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import ChatOpenAI
+import requests
+from dotenv import load_dotenv
+import pycountry
+import pytz
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))  # Secure secret key
+
+# Configure static file serving
+app.static_folder = 'static'
+app.static_url_path = '/static'
 
 # Data storage paths
 DATA_DIR = 'data'
@@ -18,14 +31,93 @@ USERS_FILE = os.path.join(DATA_DIR, 'users.json')
 CONSUMPTIONS_FILE = os.path.join(DATA_DIR, 'consumptions.json')
 CONTROLS_FILE = os.path.join(DATA_DIR, 'controls.json')
 LOCATIONS_FILE = os.path.join(DATA_DIR, 'locations.json')
+ABOUT_FILE = os.path.join(DATA_DIR, 'about.json')
+FEATURES_FILE = os.path.join(DATA_DIR, 'features.json')
 
 # Initialize data storage
 data = {
     'users': [],
     'consumptions': [],
     'controls': [],
-    'locations': []
+    'locations': [],
+    'about': {
+        'mission': "To revolutionize energy management by providing innovative, sustainable solutions that optimize energy consumption, reduce costs, and minimize environmental impact for businesses and communities across Nigeria.",
+        'vision': "To become the leading energy management platform in Africa, driving the transition to sustainable energy practices and creating a greener future for generations to come.",
+        'stats': [
+            {'number': '100+', 'label': 'Businesses Served'},
+            {'number': '30%', 'label': 'Average Energy Savings'},
+            {'number': '24/7', 'label': 'Monitoring & Support'},
+            {'number': '50+', 'label': 'Cities Covered'}
+        ],
+        'team': [
+            {'name': 'John Doe', 'position': 'CEO & Founder', 'image': 'team1.jpg'},
+            {'name': 'Jane Smith', 'position': 'CTO', 'image': 'team2.jpg'},
+            {'name': 'Mike Johnson', 'position': 'Head of Operations', 'image': 'team3.jpg'}
+        ]
+    },
+    'features': {
+        'main_features': [
+            {
+                'icon': 'chart-line',
+                'title': 'Real-time Monitoring',
+                'description': 'Track energy consumption in real-time with detailed analytics and customizable dashboards. Get instant alerts for unusual patterns and potential issues.'
+            },
+            {
+                'icon': 'solar-panel',
+                'title': 'Renewable Integration',
+                'description': 'Seamlessly integrate solar, wind, and other renewable energy sources into your energy mix. Optimize usage based on availability and cost.'
+            },
+            {
+                'icon': 'robot',
+                'title': 'AI-Powered Optimization',
+                'description': 'Leverage artificial intelligence to predict energy needs and automatically adjust systems for maximum efficiency and cost savings.'
+            },
+            {
+                'icon': 'mobile-alt',
+                'title': 'Mobile Access',
+                'description': 'Monitor and control your energy systems from anywhere using our mobile app. Receive notifications and make adjustments on the go.'
+            },
+            {
+                'icon': 'shield-alt',
+                'title': 'Security & Compliance',
+                'description': 'Enterprise-grade security with end-to-end encryption. Stay compliant with industry regulations and standards.'
+            },
+            {
+                'icon': 'chart-pie',
+                'title': 'Advanced Analytics',
+                'description': 'Deep insights into your energy usage patterns with customizable reports and predictive analytics for better decision-making.'
+            }
+        ],
+        'benefits': [
+            {
+                'icon': 'check-circle',
+                'title': 'Cost Reduction',
+                'description': 'Significant savings through optimized energy usage and reduced waste'
+            },
+            {
+                'icon': 'leaf',
+                'title': 'Sustainability',
+                'description': 'Reduce your carbon footprint and contribute to a greener future'
+            },
+            {
+                'icon': 'clock',
+                'title': 'Time Savings',
+                'description': 'Automated processes and real-time monitoring save valuable time'
+            },
+            {
+                'icon': 'chart-bar',
+                'title': 'Performance Insights',
+                'description': 'Data-driven decisions to improve overall energy efficiency'
+            }
+        ]
+    }
 }
+
+# Initialize LangChain
+llm = ChatOpenAI(
+    temperature=0.7,
+    openai_api_key=os.getenv('OPENAI_API_KEY')
+)
 
 def load_data():
     """Load data from JSON files"""
@@ -121,9 +213,35 @@ def load_data():
             with open(CONTROLS_FILE, 'w') as f:
                 json.dump(default_controls, f)
 
+        # Load about data
+        if os.path.exists(ABOUT_FILE):
+            with open(ABOUT_FILE, 'r') as f:
+                data['about'] = json.load(f)
+        else:
+            # Use default about data from initialization
+            with open(ABOUT_FILE, 'w') as f:
+                json.dump(data['about'], f)
+
+        # Load features data
+        if os.path.exists(FEATURES_FILE):
+            with open(FEATURES_FILE, 'r') as f:
+                data['features'] = json.load(f)
+        else:
+            # Use default features data from initialization
+            with open(FEATURES_FILE, 'w') as f:
+                json.dump(data['features'], f)
+
     except Exception as e:
         print(f"Error loading data: {e}")
-        data = {'users': [], 'consumptions': [], 'controls': [], 'locations': []}
+        # Keep the default data structures in case of error
+        data = {
+            'users': [],
+            'consumptions': [],
+            'controls': [],
+            'locations': [],
+            'about': data['about'],  # Keep default about data
+            'features': data['features']  # Keep default features data
+        }
 
 def generate_mock_data():
     """Generate mock consumption data for the last 24 hours"""
@@ -182,9 +300,97 @@ def login_required(f):
 @app.route('/')
 def landing():
     """Render the landing page"""
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
     return render_template('landing.html')
+
+@app.route('/about')
+def about():
+    """Render the About Us page with dynamic data"""
+    about_data = {
+        'mission': "To revolutionize energy management by providing innovative, sustainable solutions that optimize energy consumption, reduce costs, and minimize environmental impact for businesses and communities across Nigeria.",
+        'vision': "To become the leading energy management platform in Africa, driving the transition to sustainable energy practices and creating a greener future for generations to come.",
+        'stats': [
+            {'number': '100+', 'label': 'Businesses Served'},
+            {'number': '30%', 'label': 'Average Energy Savings'},
+            {'number': '24/7', 'label': 'Monitoring & Support'},
+            {'number': '50+', 'label': 'Cities Covered'}
+        ],
+        'team': [
+            {'name': 'John Doe', 'position': 'CEO & Founder', 'image': 'team1.jpg'},
+            {'name': 'Jane Smith', 'position': 'CTO', 'image': 'team2.jpg'},
+            {'name': 'Mike Johnson', 'position': 'Head of Operations', 'image': 'team3.jpg'}
+        ]
+    }
+    return render_template('about.html', about_data=about_data)
+
+@app.route('/features')
+def features():
+    """Render the Features page with dynamic data"""
+    features_data = {
+        'main_features': [
+            {
+                'icon': 'chart-line',
+                'title': 'Real-time Monitoring',
+                'description': 'Track energy consumption in real-time with detailed analytics and customizable dashboards. Get instant alerts for unusual patterns and potential issues.'
+            },
+            {
+                'icon': 'solar-panel',
+                'title': 'Renewable Integration',
+                'description': 'Seamlessly integrate solar, wind, and other renewable energy sources into your energy mix. Optimize usage based on availability and cost.'
+            },
+            {
+                'icon': 'robot',
+                'title': 'AI-Powered Optimization',
+                'description': 'Leverage artificial intelligence to predict energy needs and automatically adjust systems for maximum efficiency and cost savings.'
+            },
+            {
+                'icon': 'mobile-alt',
+                'title': 'Mobile Access',
+                'description': 'Monitor and control your energy systems from anywhere using our mobile app. Receive notifications and make adjustments on the go.'
+            },
+            {
+                'icon': 'shield-alt',
+                'title': 'Security & Compliance',
+                'description': 'Enterprise-grade security with end-to-end encryption. Stay compliant with industry regulations and standards.'
+            },
+            {
+                'icon': 'chart-pie',
+                'title': 'Advanced Analytics',
+                'description': 'Deep insights into your energy usage patterns with customizable reports and predictive analytics for better decision-making.'
+            }
+        ],
+        'benefits': [
+            {
+                'icon': 'check-circle',
+                'title': 'Cost Reduction',
+                'description': 'Significant savings through optimized energy usage and reduced waste'
+            },
+            {
+                'icon': 'leaf',
+                'title': 'Sustainability',
+                'description': 'Reduce your carbon footprint and contribute to a greener future'
+            },
+            {
+                'icon': 'clock',
+                'title': 'Time Savings',
+                'description': 'Automated processes and real-time monitoring save valuable time'
+            },
+            {
+                'icon': 'chart-bar',
+                'title': 'Performance Insights',
+                'description': 'Data-driven decisions to improve overall energy efficiency'
+            }
+        ]
+    }
+    return render_template('features.html', features_data=features_data)
+
+@app.route('/test-logo')
+def test_logo():
+    """Test route to verify logo file access"""
+    try:
+        with open('static/images/gocity.png', 'rb') as f:
+            return send_file(f, mimetype='image/png')
+    except Exception as e:
+        return str(e), 500
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -518,6 +724,141 @@ def set_admin_view():
         
     session['admin_view_mode'] = view_mode
     return jsonify({'status': 'success', 'view_mode': view_mode})
+
+@app.route('/api/about')
+def get_about_data():
+    """API endpoint to get about page data"""
+    about_data = {
+        'mission': "To revolutionize energy management by providing innovative, sustainable solutions that optimize energy consumption, reduce costs, and minimize environmental impact for businesses and communities across Nigeria.",
+        'vision': "To become the leading energy management platform in Africa, driving the transition to sustainable energy practices and creating a greener future for generations to come.",
+        'stats': [
+            {'number': '100+', 'label': 'Businesses Served'},
+            {'number': '30%', 'label': 'Average Energy Savings'},
+            {'number': '24/7', 'label': 'Monitoring & Support'},
+            {'number': '50+', 'label': 'Cities Covered'}
+        ],
+        'team': [
+            {'name': 'John Doe', 'position': 'CEO & Founder', 'image': 'team1.jpg'},
+            {'name': 'Jane Smith', 'position': 'CTO', 'image': 'team2.jpg'},
+            {'name': 'Mike Johnson', 'position': 'Head of Operations', 'image': 'team3.jpg'}
+        ]
+    }
+    return jsonify(about_data)
+
+@app.route('/api/features')
+def get_features_data():
+    """API endpoint to get features page data"""
+    features_data = {
+        'main_features': [
+            {
+                'icon': 'chart-line',
+                'title': 'Real-time Monitoring',
+                'description': 'Track energy consumption in real-time with detailed analytics and customizable dashboards. Get instant alerts for unusual patterns and potential issues.'
+            },
+            {
+                'icon': 'solar-panel',
+                'title': 'Renewable Integration',
+                'description': 'Seamlessly integrate solar, wind, and other renewable energy sources into your energy mix. Optimize usage based on availability and cost.'
+            },
+            {
+                'icon': 'robot',
+                'title': 'AI-Powered Optimization',
+                'description': 'Leverage artificial intelligence to predict energy needs and automatically adjust systems for maximum efficiency and cost savings.'
+            },
+            {
+                'icon': 'mobile-alt',
+                'title': 'Mobile Access',
+                'description': 'Monitor and control your energy systems from anywhere using our mobile app. Receive notifications and make adjustments on the go.'
+            },
+            {
+                'icon': 'shield-alt',
+                'title': 'Security & Compliance',
+                'description': 'Enterprise-grade security with end-to-end encryption. Stay compliant with industry regulations and standards.'
+            },
+            {
+                'icon': 'chart-pie',
+                'title': 'Advanced Analytics',
+                'description': 'Deep insights into your energy usage patterns with customizable reports and predictive analytics for better decision-making.'
+            }
+        ],
+        'benefits': [
+            {
+                'icon': 'check-circle',
+                'title': 'Cost Reduction',
+                'description': 'Significant savings through optimized energy usage and reduced waste'
+            },
+            {
+                'icon': 'leaf',
+                'title': 'Sustainability',
+                'description': 'Reduce your carbon footprint and contribute to a greener future'
+            },
+            {
+                'icon': 'clock',
+                'title': 'Time Savings',
+                'description': 'Automated processes and real-time monitoring save valuable time'
+            },
+            {
+                'icon': 'chart-bar',
+                'title': 'Performance Insights',
+                'description': 'Data-driven decisions to improve overall energy efficiency'
+            }
+        ]
+    }
+    return jsonify(features_data)
+
+@app.route('/api/countries')
+def get_countries():
+    """Get list of all countries"""
+    try:
+        countries = [
+            {
+                'name': country.name,
+                'code': country.alpha_2,
+                'currency': getattr(country, 'currency', None),
+                'flag': f"https://flagcdn.com/w40/{country.alpha_2.lower()}.png"
+            }
+            for country in pycountry.countries
+        ]
+        return jsonify(sorted(countries, key=lambda x: x['name']))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/timezones')
+def get_timezones():
+    try:
+        timezones = []
+        for country in pycountry.countries:
+            try:
+                # Get continent information
+                continent = pycountry.countries.get(alpha_2=country.alpha_2).continent
+                if not continent:
+                    continent = "Other"
+                
+                # Get time zones for the country
+                country_tz = pycountry.countries.get(alpha_2=country.alpha_2).timezones
+                for tz_name in country_tz:
+                    tz = pytz.timezone(tz_name)
+                    offset = tz.utcoffset(datetime.now())
+                    offset_hours = offset.total_seconds() / 3600
+                    offset_str = f"UTC{offset_hours:+03.0f}:00"
+                    
+                    timezones.append({
+                        'value': tz_name,
+                        'label': f"{country.name} - {tz_name}",
+                        'countryCode': country.alpha_2,
+                        'countryName': country.name,
+                        'continent': continent,
+                        'offset': offset_str
+                    })
+            except Exception as e:
+                print(f"Error processing country {country.name}: {str(e)}")
+                continue
+        
+        # Sort timezones by continent and country name
+        timezones.sort(key=lambda x: (x['continent'], x['countryName']))
+        return jsonify(timezones)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Initialize data when starting the application
 load_data()
