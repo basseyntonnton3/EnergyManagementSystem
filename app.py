@@ -15,6 +15,7 @@ import requests
 from dotenv import load_dotenv
 import pycountry
 import pytz
+import time
 
 load_dotenv()
 
@@ -118,6 +119,9 @@ llm = ChatOpenAI(
     temperature=0.7,
     openai_api_key=os.getenv('OPENAI_API_KEY')
 )
+
+# Add your OpenWeatherMap API key here
+OPENWEATHER_API_KEY = "YOUR_API_KEY_HERE"
 
 def load_data():
     """Load data from JSON files"""
@@ -304,84 +308,13 @@ def landing():
 
 @app.route('/about')
 def about():
-    """Render the About Us page with dynamic data"""
-    about_data = {
-        'mission': "To revolutionize energy management by providing innovative, sustainable solutions that optimize energy consumption, reduce costs, and minimize environmental impact for businesses and communities across Nigeria.",
-        'vision': "To become the leading energy management platform in Africa, driving the transition to sustainable energy practices and creating a greener future for generations to come.",
-        'stats': [
-            {'number': '100+', 'label': 'Businesses Served'},
-            {'number': '30%', 'label': 'Average Energy Savings'},
-            {'number': '24/7', 'label': 'Monitoring & Support'},
-            {'number': '50+', 'label': 'Cities Covered'}
-        ],
-        'team': [
-            {'name': 'John Doe', 'position': 'CEO & Founder', 'image': 'team1.jpg'},
-            {'name': 'Jane Smith', 'position': 'CTO', 'image': 'team2.jpg'},
-            {'name': 'Mike Johnson', 'position': 'Head of Operations', 'image': 'team3.jpg'}
-        ]
-    }
-    return render_template('about.html', about_data=about_data)
+    """Render the about page"""
+    return render_template('about.html')
 
 @app.route('/features')
 def features():
-    """Render the Features page with dynamic data"""
-    features_data = {
-        'main_features': [
-            {
-                'icon': 'chart-line',
-                'title': 'Real-time Monitoring',
-                'description': 'Track energy consumption in real-time with detailed analytics and customizable dashboards. Get instant alerts for unusual patterns and potential issues.'
-            },
-            {
-                'icon': 'solar-panel',
-                'title': 'Renewable Integration',
-                'description': 'Seamlessly integrate solar, wind, and other renewable energy sources into your energy mix. Optimize usage based on availability and cost.'
-            },
-            {
-                'icon': 'robot',
-                'title': 'AI-Powered Optimization',
-                'description': 'Leverage artificial intelligence to predict energy needs and automatically adjust systems for maximum efficiency and cost savings.'
-            },
-            {
-                'icon': 'mobile-alt',
-                'title': 'Mobile Access',
-                'description': 'Monitor and control your energy systems from anywhere using our mobile app. Receive notifications and make adjustments on the go.'
-            },
-            {
-                'icon': 'shield-alt',
-                'title': 'Security & Compliance',
-                'description': 'Enterprise-grade security with end-to-end encryption. Stay compliant with industry regulations and standards.'
-            },
-            {
-                'icon': 'chart-pie',
-                'title': 'Advanced Analytics',
-                'description': 'Deep insights into your energy usage patterns with customizable reports and predictive analytics for better decision-making.'
-            }
-        ],
-        'benefits': [
-            {
-                'icon': 'check-circle',
-                'title': 'Cost Reduction',
-                'description': 'Significant savings through optimized energy usage and reduced waste'
-            },
-            {
-                'icon': 'leaf',
-                'title': 'Sustainability',
-                'description': 'Reduce your carbon footprint and contribute to a greener future'
-            },
-            {
-                'icon': 'clock',
-                'title': 'Time Savings',
-                'description': 'Automated processes and real-time monitoring save valuable time'
-            },
-            {
-                'icon': 'chart-bar',
-                'title': 'Performance Insights',
-                'description': 'Data-driven decisions to improve overall energy efficiency'
-            }
-        ]
-    }
-    return render_template('features.html', features_data=features_data)
+    """Render the features page"""
+    return render_template('features.html')
 
 @app.route('/test-logo')
 def test_logo():
@@ -857,6 +790,45 @@ def get_timezones():
         # Sort timezones by continent and country name
         timezones.sort(key=lambda x: (x['continent'], x['countryName']))
         return jsonify(timezones)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/weather')
+def weather():
+    return render_template('weather.html')
+
+@app.route('/api/weather')
+def get_weather():
+    location = request.args.get('location', '')
+    
+    if not location:
+        return jsonify({'error': 'Location parameter is required'}), 400
+
+    try:
+        # First, get coordinates from location name
+        geocode_url = f"http://api.openweathermap.org/geo/1.0/direct?q={location}&limit=1&appid={OPENWEATHER_API_KEY}"
+        geocode_response = requests.get(geocode_url)
+        geocode_data = geocode_response.json()
+
+        if not geocode_data:
+            return jsonify({'error': 'Location not found'}), 404
+
+        lat = geocode_data[0]['lat']
+        lon = geocode_data[0]['lon']
+        location_name = f"{geocode_data[0]['name']}, {geocode_data[0]['country']}"
+
+        # Then, get weather data using coordinates
+        weather_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
+        weather_response = requests.get(weather_url)
+        weather_data = weather_response.json()
+
+        # Add location name to the response
+        weather_data['location'] = location_name
+
+        return jsonify(weather_data)
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': 'Failed to fetch weather data'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
