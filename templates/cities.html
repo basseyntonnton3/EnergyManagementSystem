@@ -1,0 +1,114 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col">
+      <a href="/weather" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left"></i> Back to Countries
+      </a>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col">
+      <h2>{{ state_name }}, {{ country_name }}</h2>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+      <div class="search-box">
+        <input
+          type="text"
+          class="form-control"
+          id="citySearch"
+          placeholder="Search cities..."
+          onkeyup="filterCities(this)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="citiesContainer">
+    {% for city in cities %}
+    <div class="col-md-4 mb-4">
+      <a
+        href="/weather/{{ continent }}/{{ country_code }}/{{ state_code }}/{{ city.name }}"
+        class="text-decoration-none"
+      >
+        <div class="city-card">
+          <h3 class="city-name">{{ city.name }}</h3>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .city-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: white;
+    text-align: center;
+  }
+
+  .city-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .city-name {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .search-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .search-box input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .search-box input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    box-shadow: none;
+  }
+</style>
+
+<script>
+  function filterCities(input) {
+    const searchTerm = input.value.toLowerCase();
+    const cityCards = document.querySelectorAll(".city-card");
+
+    cityCards.forEach((card) => {
+      const cityName = card
+        .querySelector(".city-name")
+        .textContent.toLowerCase();
+      const parent = card.closest(".col-md-4");
+      if (cityName.includes(searchTerm)) {
+        parent.style.display = "";
+      } else {
+        parent.style.display = "none";
+      }
+    });
+  }
+</script>
+{% endblock %}

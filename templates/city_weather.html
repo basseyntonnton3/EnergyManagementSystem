@@ -1,0 +1,144 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col">
+      <a
+        href="/cities/{{ continent }}/{{ country_code }}/{{ state_code }}"
+        class="btn btn-outline-light"
+      >
+        <i class="fas fa-arrow-left"></i> Back to Cities
+      </a>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col">
+      <h2>{{ city_name }}, {{ state_name }}, {{ country_name }}</h2>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <div class="weather-card">
+        <div class="current-weather">
+          <div class="weather-main">
+            <div class="temperature">{{ weather.current.temperature }}°C</div>
+            <div class="condition">{{ weather.current.condition }}</div>
+          </div>
+          <div class="weather-details">
+            <div class="detail-item">
+              <i class="fas fa-tint"></i>
+              <span>Humidity: {{ weather.current.humidity }}%</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-wind"></i>
+              <span>Wind: {{ weather.current.wind_speed }} km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="forecast">
+          <h3 class="forecast-title">5-Day Forecast</h3>
+          <div class="forecast-grid">
+            {% for day in weather.forecast %}
+            <div class="forecast-day">
+              <div class="day">{{ day.date }}</div>
+              <div class="temp">{{ day.high }}°C / {{ day.low }}°C</div>
+              <div class="condition">{{ day.condition }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .weather-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .current-weather {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .weather-main {
+    margin-bottom: 1.5rem;
+  }
+
+  .temperature {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .condition {
+    font-size: 1.5rem;
+    opacity: 0.9;
+  }
+
+  .weather-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .detail-item i {
+    font-size: 1.2rem;
+    color: #feb47b;
+  }
+
+  .forecast {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .forecast-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .forecast-day {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .forecast-day .day {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .forecast-day .temp {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .forecast-day .condition {
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+</style>
+{% endblock %}

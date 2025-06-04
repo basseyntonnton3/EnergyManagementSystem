@@ -1,0 +1,65 @@
+{
+  "US": [
+    { "name": "Alabama", "code": "AL" },
+    { "name": "Alaska", "code": "AK" },
+    { "name": "Arizona", "code": "AZ" },
+    { "name": "California", "code": "CA" },
+    { "name": "New York", "code": "NY" },
+    { "name": "Texas", "code": "TX" },
+    { "name": "Florida", "code": "FL" }
+  ],
+  "CA": [
+    { "name": "Ontario", "code": "ON" },
+    { "name": "Quebec", "code": "QC" },
+    { "name": "British Columbia", "code": "BC" },
+    { "name": "Alberta", "code": "AB" }
+  ],
+  "IN": [
+    { "name": "Maharashtra", "code": "MH" },
+    { "name": "Delhi", "code": "DL" },
+    { "name": "Karnataka", "code": "KA" },
+    { "name": "Tamil Nadu", "code": "TN" }
+  ],
+  "CN": [
+    { "name": "Beijing", "code": "BJ" },
+    { "name": "Shanghai", "code": "SH" },
+    { "name": "Guangdong", "code": "GD" },
+    { "name": "Sichuan", "code": "SC" }
+  ],
+  "BR": [
+    { "name": "São Paulo", "code": "SP" },
+    { "name": "Rio de Janeiro", "code": "RJ" },
+    { "name": "Minas Gerais", "code": "MG" },
+    { "name": "Bahia", "code": "BA" }
+  ],
+  "AU": [
+    { "name": "New South Wales", "code": "NSW" },
+    { "name": "Victoria", "code": "VIC" },
+    { "name": "Queensland", "code": "QLD" },
+    { "name": "Western Australia", "code": "WA" }
+  ],
+  "GB": [
+    { "name": "England", "code": "ENG" },
+    { "name": "Scotland", "code": "SCT" },
+    { "name": "Wales", "code": "WLS" },
+    { "name": "Northern Ireland", "code": "NIR" }
+  ],
+  "DE": [
+    { "name": "Bavaria", "code": "BY" },
+    { "name": "Berlin", "code": "BE" },
+    { "name": "Hamburg", "code": "HH" },
+    { "name": "North Rhine-Westphalia", "code": "NW" }
+  ],
+  "FR": [
+    { "name": "Île-de-France", "code": "IDF" },
+    { "name": "Provence-Alpes-Côte d'Azur", "code": "PAC" },
+    { "name": "Auvergne-Rhône-Alpes", "code": "ARA" },
+    { "name": "Occitanie", "code": "OCC" }
+  ],
+  "JP": [
+    { "name": "Tokyo", "code": "TK" },
+    { "name": "Osaka", "code": "OS" },
+    { "name": "Kyoto", "code": "KY" },
+    { "name": "Hokkaido", "code": "HK" }
+  ]
+}

@@ -1,0 +1,111 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col">
+      <a href="/" class="btn btn-outline-light">
+        <i class="fas fa-arrow-left"></i> Back to Home
+      </a>
+    </div>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-6 mx-auto">
+      <div class="search-box">
+        <input
+          type="text"
+          class="form-control"
+          id="continentSearch"
+          placeholder="Search for a continent..."
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="continentsContainer">
+    {% for continent in continents %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <a href="/weather/{{ continent.name }}" class="text-decoration-none">
+        <div class="continent-card" data-continent="{{ continent.name }}">
+          <div class="continent-icon">
+            <i class="fas {{ continent.icon }}"></i>
+          </div>
+          <h3 class="continent-name">{{ continent.name }}</h3>
+          <p class="continent-description">{{ continent.description }}</p>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .search-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .continent-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .continent-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .continent-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #feb47b;
+  }
+
+  .continent-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: white;
+  }
+
+  .continent-description {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin: 0;
+    color: white;
+  }
+</style>
+
+<script>
+  document
+    .getElementById("continentSearch")
+    .addEventListener("input", function (e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const cards = document.querySelectorAll(".continent-card");
+
+      cards.forEach((card) => {
+        const continentName = card
+          .querySelector(".continent-name")
+          .textContent.toLowerCase();
+        if (continentName.includes(searchTerm)) {
+          card.parentElement.style.display = "block";
+        } else {
+          card.parentElement.style.display = "none";
+        }
+      });
+    });
+</script>
+{% endblock %}

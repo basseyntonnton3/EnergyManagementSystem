@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 import pycountry
 import pytz
 import time
+from geography import get_continents, get_countries, get_states
+import secrets
 
 load_dotenv()
 
@@ -120,8 +122,50 @@ llm = ChatOpenAI(
     openai_api_key=os.getenv('OPENAI_API_KEY')
 )
 
-# Add your OpenWeatherMap API key here
-OPENWEATHER_API_KEY = "YOUR_API_KEY_HERE"
+# Weather API configuration
+WEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
+if not WEATHER_API_KEY:
+    raise ValueError("OPENWEATHER_API_KEY environment variable is not set")
+WEATHER_API_URL = "http://api.openweathermap.org/data/2.5"
+
+# Continent data structure
+CONTINENTS = [
+    {
+        'name': 'Africa',
+        'icon': 'fa-globe-africa',
+        'description': 'Explore weather conditions across the diverse landscapes of Africa'
+    },
+    {
+        'name': 'Asia',
+        'icon': 'fa-globe-asia',
+        'description': 'Discover weather patterns across the vast continent of Asia'
+    },
+    {
+        'name': 'Europe',
+        'icon': 'fa-globe-europe',
+        'description': 'Check weather conditions throughout European countries'
+    },
+    {
+        'name': 'North America',
+        'icon': 'fa-globe-americas',
+        'description': 'View weather information for North American regions'
+    },
+    {
+        'name': 'South America',
+        'icon': 'fa-globe-americas',
+        'description': 'Explore weather patterns across South American countries'
+    },
+    {
+        'name': 'Oceania',
+        'icon': 'fa-globe-oceania',
+        'description': 'Check weather conditions in Oceania and Pacific islands'
+    },
+    {
+        'name': 'Antarctica',
+        'icon': 'fa-snowflake',
+        'description': 'View weather information for Antarctic regions'
+    }
+]
 
 def load_data():
     """Load data from JSON files"""
@@ -795,42 +839,640 @@ def get_timezones():
 
 @app.route('/weather')
 def weather():
-    return render_template('weather.html')
+    continents = [
+        {'name': 'North America', 'code': 'NA'},
+        {'name': 'South America', 'code': 'SA'},
+        {'name': 'Europe', 'code': 'EU'},
+        {'name': 'Africa', 'code': 'AF'},
+        {'name': 'Asia', 'code': 'AS'},
+        {'name': 'Oceania', 'code': 'OC'}
+    ]
+    return render_template('weather.html', continents=continents)
 
-@app.route('/api/weather')
-def get_weather():
-    location = request.args.get('location', '')
-    
-    if not location:
-        return jsonify({'error': 'Location parameter is required'}), 400
+@app.route('/api/countries/<continent>')
+def api_countries(continent):
+    """API endpoint to get countries for a continent."""
+    countries = get_countries(continent)
+    return jsonify(countries)
 
+@app.route('/api/states/<continent>/<country_code>')
+def api_states(continent, country_code):
+    """API endpoint to get states for a country"""
     try:
-        # First, get coordinates from location name
-        geocode_url = f"http://api.openweathermap.org/geo/1.0/direct?q={location}&limit=1&appid={OPENWEATHER_API_KEY}"
-        geocode_response = requests.get(geocode_url)
-        geocode_data = geocode_response.json()
-
-        if not geocode_data:
-            return jsonify({'error': 'Location not found'}), 404
-
-        lat = geocode_data[0]['lat']
-        lon = geocode_data[0]['lon']
-        location_name = f"{geocode_data[0]['name']}, {geocode_data[0]['country']}"
-
-        # Then, get weather data using coordinates
-        weather_url = f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&appid={OPENWEATHER_API_KEY}&units=metric"
-        weather_response = requests.get(weather_url)
-        weather_data = weather_response.json()
-
-        # Add location name to the response
-        weather_data['location'] = location_name
-
-        return jsonify(weather_data)
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': 'Failed to fetch weather data'}), 500
+        # Get country subdivisions using pycountry
+        subdivisions = pycountry.subdivisions.get(country_code=country_code)
+        
+        if not subdivisions:
+            # If no subdivisions found, try to get states from the JSON file as fallback
+            try:
+                with open('data/states.json', 'r') as f:
+                    states_data = json.load(f)
+                country_states = states_data.get(country_code, [])
+                return jsonify(country_states)
+            except Exception:
+                return jsonify([])
+        
+        # Format subdivisions data
+        formatted_states = []
+        for subdivision in subdivisions:
+            formatted_states.append({
+                'name': subdivision.name,
+                'code': subdivision.code.split('-')[1]  # Remove country code prefix
+            })
+        
+        # Sort states by name
+        formatted_states.sort(key=lambda x: x['name'])
+        return jsonify(formatted_states)
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/cities/<continent>/<country_code>/<state_code>')
+def get_cities(continent, country_code, state_code):
+    """API endpoint to get cities for a state"""
+    try:
+        # Try to get cities from the JSON file first
+        try:
+            with open('data/cities.json', 'r') as f:
+                cities_data = json.load(f)
+            country_cities = cities_data.get(country_code, {})
+            state_cities = country_cities.get(state_code, [])
+            if state_cities:
+                return jsonify(state_cities)
+        except Exception:
+            pass
+
+        # If no cities found in JSON, use a fallback list of major cities
+        major_cities = {
+            'US': {
+                'AL': ['Birmingham', 'Montgomery', 'Mobile', 'Huntsville', 'Tuscaloosa', 'Auburn'],
+                'AK': ['Anchorage', 'Fairbanks', 'Juneau', 'Wasilla', 'Sitka', 'Kodiak'],
+                'AZ': ['Phoenix', 'Tucson', 'Mesa', 'Scottsdale', 'Glendale', 'Tempe', 'Chandler'],
+                'CA': ['Los Angeles', 'San Francisco', 'San Diego', 'Sacramento', 'San Jose', 'Fresno', 'Long Beach', 'Oakland'],
+                'CO': ['Denver', 'Colorado Springs', 'Aurora', 'Fort Collins', 'Lakewood', 'Thornton'],
+                'CT': ['Bridgeport', 'New Haven', 'Hartford', 'Stamford', 'Waterbury', 'Norwalk'],
+                'FL': ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'St. Petersburg', 'Hialeah', 'Fort Lauderdale', 'Tallahassee'],
+                'GA': ['Atlanta', 'Augusta', 'Columbus', 'Macon', 'Savannah', 'Athens'],
+                'IL': ['Chicago', 'Aurora', 'Rockford', 'Joliet', 'Naperville', 'Springfield'],
+                'IN': ['Indianapolis', 'Fort Wayne', 'Evansville', 'South Bend', 'Carmel', 'Bloomington'],
+                'MA': ['Boston', 'Worcester', 'Springfield', 'Cambridge', 'Lowell', 'Brockton'],
+                'MI': ['Detroit', 'Grand Rapids', 'Warren', 'Sterling Heights', 'Lansing', 'Ann Arbor'],
+                'MN': ['Minneapolis', 'St. Paul', 'Rochester', 'Duluth', 'Bloomington', 'Brooklyn Park'],
+                'NY': ['New York City', 'Buffalo', 'Rochester', 'Syracuse', 'Yonkers', 'Albany'],
+                'OH': ['Columbus', 'Cleveland', 'Cincinnati', 'Toledo', 'Akron', 'Dayton'],
+                'PA': ['Philadelphia', 'Pittsburgh', 'Allentown', 'Erie', 'Reading', 'Scranton'],
+                'TX': ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth', 'El Paso', 'Arlington', 'Corpus Christi'],
+                'WA': ['Seattle', 'Spokane', 'Tacoma', 'Vancouver', 'Bellevue', 'Kent']
+            },
+            'CA': {
+                'ON': ['Toronto', 'Ottawa', 'Hamilton', 'London', 'Windsor', 'Kitchener', 'Mississauga', 'Brampton'],
+                'BC': ['Vancouver', 'Victoria', 'Surrey', 'Burnaby', 'Richmond', 'Abbotsford', 'Coquitlam'],
+                'AB': ['Calgary', 'Edmonton', 'Red Deer', 'Lethbridge', 'St. Albert', 'Medicine Hat'],
+                'QC': ['Montreal', 'Quebec City', 'Laval', 'Gatineau', 'Longueuil', 'Sherbrooke'],
+                'NS': ['Halifax', 'Sydney', 'Truro', 'New Glasgow', 'Glace Bay', 'Kentville']
+            },
+            'GB': {
+                'ENG': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Leeds', 'Sheffield', 'Bristol', 'Newcastle'],
+                'SCT': ['Edinburgh', 'Glasgow', 'Aberdeen', 'Dundee', 'Inverness', 'Perth'],
+                'WLS': ['Cardiff', 'Swansea', 'Newport', 'Bangor', 'St. Davids', 'St. Asaph'],
+                'NIR': ['Belfast', 'Derry', 'Lisburn', 'Newry', 'Bangor', 'Craigavon']
+            },
+            'AU': {
+                'NSW': ['Sydney', 'Newcastle', 'Wollongong', 'Maitland', 'Coffs Harbour', 'Wagga Wagga'],
+                'VIC': ['Melbourne', 'Geelong', 'Ballarat', 'Bendigo', 'Shepparton', 'Melton'],
+                'QLD': ['Brisbane', 'Gold Coast', 'Sunshine Coast', 'Townsville', 'Cairns', 'Toowoomba'],
+                'WA': ['Perth', 'Bunbury', 'Geraldton', 'Albany', 'Kalgoorlie', 'Broome'],
+                'SA': ['Adelaide', 'Mount Gambier', 'Whyalla', 'Murray Bridge', 'Port Augusta', 'Port Pirie']
+            },
+            'IN': {
+                'MH': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Aurangabad'],
+                'KA': ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum', 'Gulbarga'],
+                'TN': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', 'Tirunelveli'],
+                'GJ': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar'],
+                'DL': ['New Delhi', 'Delhi Cantonment', 'New Delhi Cantonment']
+            },
+            'CN': {
+                'BJ': ['Beijing', 'Tongzhou', 'Changping', 'Daxing', 'Fangshan', 'Mentougou'],
+                'SH': ['Shanghai', 'Pudong', 'Huangpu', 'Xuhui', 'Changning', 'Jing\'an'],
+                'GD': ['Guangzhou', 'Shenzhen', 'Dongguan', 'Foshan', 'Zhuhai', 'Shantou'],
+                'JS': ['Nanjing', 'Suzhou', 'Wuxi', 'Changzhou', 'Nantong', 'Yangzhou'],
+                'ZJ': ['Hangzhou', 'Ningbo', 'Wenzhou', 'Shaoxing', 'Jinhua', 'Huzhou']
+            },
+            'BR': {
+                'SP': ['São Paulo', 'Campinas', 'Santos', 'São José dos Campos', 'Ribeirão Preto', 'Sorocaba'],
+                'RJ': ['Rio de Janeiro', 'Niterói', 'São Gonçalo', 'Duque de Caxias', 'Nova Iguaçu', 'São João de Meriti'],
+                'MG': ['Belo Horizonte', 'Uberlândia', 'Contagem', 'Juiz de Fora', 'Betim', 'Montes Claros'],
+                'RS': ['Porto Alegre', 'Caxias do Sul', 'Pelotas', 'Canoas', 'Santa Maria', 'Novo Hamburgo'],
+                'PR': ['Curitiba', 'Londrina', 'Maringá', 'Ponta Grossa', 'Cascavel', 'São José dos Pinhais']
+            }
+        }
+
+        # Get cities for the specified state
+        country_cities = major_cities.get(country_code, {})
+        state_cities = country_cities.get(state_code, [])
+
+        # Format cities data
+        formatted_cities = []
+        for city in state_cities:
+            formatted_cities.append({
+                'name': city,
+                'code': city.lower().replace(' ', '_')
+            })
+
+        return jsonify(formatted_cities)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/select-continent')
+def select_continent():
+    return render_template('continent_selection.html', continents=CONTINENTS)
+
+@app.route('/weather/<continent>')
+def continent_weather(continent):
+    # Get countries for the selected continent
+    countries = get_countries(continent)
+    return render_template('weather.html', continent=continent, countries=countries)
+
+@app.route('/api/weather/<continent>/<country_code>/<city_name>')
+def get_weather(continent, country_code, city_name):
+    """API endpoint to get weather data for a city"""
+    try:
+        # Make API request to get weather data
+        current_weather_url = f"http://api.openweathermap.org/data/2.5/weather"
+        params = {
+            'q': f"{city_name},{country_code}",
+            'appid': WEATHER_API_KEY,
+            'units': 'metric'
+        }
+        response = requests.get(current_weather_url, params=params)
+        current_data = response.json()
+
+        if response.status_code != 200:
+            return jsonify({'error': 'Failed to fetch weather data'}), 400
+
+        # Get 5-day forecast
+        forecast_url = f"http://api.openweathermap.org/data/2.5/forecast"
+        forecast_response = requests.get(forecast_url, params=params)
+        forecast_data = forecast_response.json()
+
+        if forecast_response.status_code != 200:
+            return jsonify({'error': 'Failed to fetch forecast data'}), 400
+
+        # Process current weather data
+        current_weather = {
+            'temperature': round(current_data['main']['temp']),
+            'condition': current_data['weather'][0]['main'],
+            'humidity': current_data['main']['humidity'],
+            'wind_speed': round(current_data['wind']['speed'] * 3.6)  # Convert m/s to km/h
+        }
+
+        # Process forecast data
+        forecast = []
+        current_date = None
+        daily_forecast = {'high': -float('inf'), 'low': float('inf'), 'conditions': set()}
+        
+        for item in forecast_data['list']:
+            date = datetime.fromtimestamp(item['dt']).strftime('%Y-%m-%d')
+            
+            if current_date and date != current_date:
+                forecast.append({
+                    'date': datetime.strptime(current_date, '%Y-%m-%d').strftime('%A'),
+                    'high': round(daily_forecast['high']),
+                    'low': round(daily_forecast['low']),
+                    'condition': max(daily_forecast['conditions'], key=daily_forecast['conditions'].count)
+                })
+                daily_forecast = {'high': -float('inf'), 'low': float('inf'), 'conditions': set()}
+            
+            current_date = date
+            daily_forecast['high'] = max(daily_forecast['high'], item['main']['temp_max'])
+            daily_forecast['low'] = min(daily_forecast['low'], item['main']['temp_min'])
+            daily_forecast['conditions'].add(item['weather'][0]['main'])
+        
+        # Add the last day
+        if current_date:
+            forecast.append({
+                'date': datetime.strptime(current_date, '%Y-%m-%d').strftime('%A'),
+                'high': round(daily_forecast['high']),
+                'low': round(daily_forecast['low']),
+                'condition': max(daily_forecast['conditions'], key=daily_forecast['conditions'].count)
+            })
+        
+        return jsonify({
+            'current': current_weather,
+            'forecast': forecast[:5]  # Return only 5 days
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/weather/custom/<city_name>')
+def get_custom_city_weather(city_name):
+    """API endpoint to get weather data for a custom city"""
+    try:
+        country_code = request.args.get('country')
+        
+        # Check if API key is configured
+        if not WEATHER_API_KEY:
+            print("Error: Weather API key not configured")
+            return jsonify({'error': 'Weather API key not configured. Please set OPENWEATHER_API_KEY environment variable.'}), 500
+
+        # Make API request to get weather data for the custom city
+        current_weather_url = f"{WEATHER_API_URL}/weather"
+        params = {
+            'q': f"{city_name},{country_code}" if country_code else city_name,
+            'appid': WEATHER_API_KEY,
+            'units': 'metric'
+        }
+        
+        print(f"Making weather API request to: {current_weather_url}")
+        print(f"With parameters: {params}")
+        
+        current_response = requests.get(current_weather_url, params=params)
+        print(f"Weather API response status: {current_response.status_code}")
+        
+        if current_response.status_code != 200:
+            error_data = current_response.json()
+            error_message = error_data.get('message', 'Unknown error')
+            print(f"Weather API error: {error_message}")
+            return jsonify({'error': f'Weather API error: {error_message}'}), current_response.status_code
+        
+        current_data = current_response.json()
+        
+        # Get forecast data
+        forecast_url = f"{WEATHER_API_URL}/forecast"
+        print(f"Making forecast API request to: {forecast_url}")
+        
+        forecast_response = requests.get(forecast_url, params=params)
+        print(f"Forecast API response status: {forecast_response.status_code}")
+        
+        if forecast_response.status_code != 200:
+            error_data = forecast_response.json()
+            error_message = error_data.get('message', 'Unknown error')
+            print(f"Forecast API error: {error_message}")
+            return jsonify({'error': f'Forecast API error: {error_message}'}), forecast_response.status_code
+            
+        forecast_data = forecast_response.json()
+        
+        # Process current weather data
+        try:
+            current_weather = {
+                'temperature': round(current_data['main']['temp']),
+                'condition': current_data['weather'][0]['main'],
+                'description': current_data['weather'][0]['description'],
+                'humidity': current_data['main']['humidity'],
+                'wind_speed': round(current_data['wind']['speed'] * 3.6),  # Convert m/s to km/h
+                'pressure': current_data['main']['pressure'],
+                'visibility': current_data['visibility'],
+                'feels_like': round(current_data['main']['feels_like']),
+                'temp_min': round(current_data['main']['temp_min']),
+                'temp_max': round(current_data['main']['temp_max']),
+                'clouds': current_data['clouds']['all'],
+                'sunrise': datetime.fromtimestamp(current_data['sys']['sunrise']).strftime('%H:%M'),
+                'sunset': datetime.fromtimestamp(current_data['sys']['sunset']).strftime('%H:%M'),
+                'country': current_data['sys']['country'],
+                'city': current_data['name']
+            }
+        except KeyError as e:
+            print(f"Error processing current weather data: {str(e)}")
+            return jsonify({'error': 'Error processing weather data'}), 500
+        
+        # Process forecast data
+        try:
+            forecast = []
+            current_date = None
+            daily_forecast = {
+                'high': -float('inf'),
+                'low': float('inf'),
+                'conditions': {},
+                'descriptions': {}
+            }
+            
+            for item in forecast_data['list']:
+                date = datetime.fromtimestamp(item['dt']).strftime('%Y-%m-%d')
+                
+                if current_date and date != current_date:
+                    # Get most common condition and description
+                    most_common_condition = max(daily_forecast['conditions'].items(), key=lambda x: x[1])[0]
+                    most_common_description = max(daily_forecast['descriptions'].items(), key=lambda x: x[1])[0]
+                    
+                    forecast.append({
+                        'date': datetime.strptime(current_date, '%Y-%m-%d').strftime('%A'),
+                        'high': round(daily_forecast['high']),
+                        'low': round(daily_forecast['low']),
+                        'condition': most_common_condition,
+                        'description': most_common_description
+                    })
+                    daily_forecast = {
+                        'high': -float('inf'),
+                        'low': float('inf'),
+                        'conditions': {},
+                        'descriptions': {}
+                    }
+                
+                current_date = date
+                daily_forecast['high'] = max(daily_forecast['high'], item['main']['temp_max'])
+                daily_forecast['low'] = min(daily_forecast['low'], item['main']['temp_min'])
+                
+                # Count conditions and descriptions
+                condition = item['weather'][0]['main']
+                description = item['weather'][0]['description']
+                daily_forecast['conditions'][condition] = daily_forecast['conditions'].get(condition, 0) + 1
+                daily_forecast['descriptions'][description] = daily_forecast['descriptions'].get(description, 0) + 1
+            
+            # Add the last day
+            if current_date:
+                most_common_condition = max(daily_forecast['conditions'].items(), key=lambda x: x[1])[0]
+                most_common_description = max(daily_forecast['descriptions'].items(), key=lambda x: x[1])[0]
+                
+                forecast.append({
+                    'date': datetime.strptime(current_date, '%Y-%m-%d').strftime('%A'),
+                    'high': round(daily_forecast['high']),
+                    'low': round(daily_forecast['low']),
+                    'condition': most_common_condition,
+                    'description': most_common_description
+                })
+        except KeyError as e:
+            print(f"Error processing forecast data: {str(e)}")
+            return jsonify({'error': 'Error processing forecast data'}), 500
+        
+        return jsonify({
+            'current': current_weather,
+            'forecast': forecast[:5]  # Return only 5 days
+        })
+    except Exception as e:
+        print(f"Weather API error: {str(e)}")
+        return jsonify({'error': f'Failed to fetch weather data: {str(e)}'}), 500
+
+def get_countries(continent=None):
+    """Get list of countries, optionally filtered by continent"""
+    try:
+        # Load countries data from the JSON file
+        with open('data/countries.json', 'r', encoding='utf-8') as f:
+            countries_data = json.load(f)
+
+        # Filter countries by continent if specified
+        if continent:
+            countries_data = [country for country in countries_data if country.get('continent') == continent]
+
+        # Format country data
+        countries = []
+        for country in countries_data:
+            countries.append({
+                'name': country['name'],
+                'code': country['code'],
+                'currency': country.get('currency', ''),
+                'flag': f"https://flagcdn.com/w80/{country['code'].lower()}.png"
+            })
+
+        # Sort countries by name
+        countries.sort(key=lambda x: x['name'])
+        return countries
+
+    except Exception as e:
+        print(f"Error loading countries: {str(e)}")
+        return []
+
+@app.route('/cities/<continent>/<country_code>/<state_code>')
+def show_cities(continent, country_code, state_code):
+    """Show cities for a state"""
+    try:
+        # Get country and state names
+        country = pycountry.countries.get(alpha_2=country_code)
+        country_name = country.name if country else country_code
+        
+        # Get cities for the state
+        cities = get_cities(continent, country_code, state_code)
+        if isinstance(cities, tuple):  # Error response
+            cities = []
+            
+        # Get state name from the first city's state code
+        state_name = state_code
+        if cities and len(cities) > 0:
+            state_name = cities[0].get('state_name', state_code)
+            
+        return render_template('cities.html',
+                             continent=continent,
+                             country_code=country_code,
+                             country_name=country_name,
+                             state_code=state_code,
+                             state_name=state_name,
+                             cities=cities)
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for('weather'))
+
+@app.route('/weather/<continent>/<country_code>/<state_code>/<city_name>')
+def show_city_weather(continent, country_code, state_code, city_name):
+    """Show weather for a specific city"""
+    try:
+        # Get country and state names
+        country = pycountry.countries.get(alpha_2=country_code)
+        country_name = country.name if country else country_code
+        
+        # Get weather data
+        weather_data = get_weather(continent, country_code, city_name)
+        if isinstance(weather_data, tuple):  # Error response
+            flash(weather_data[0].get('error', 'Failed to fetch weather data'))
+            return redirect(url_for('show_cities', 
+                                  continent=continent,
+                                  country_code=country_code,
+                                  state_code=state_code))
+            
+        return render_template('city_weather.html',
+                             continent=continent,
+                             country_code=country_code,
+                             country_name=country_name,
+                             state_code=state_code,
+                             state_name=state_code,  # You might want to get the actual state name
+                             city_name=city_name,
+                             weather=weather_data)
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for('show_cities',
+                              continent=continent,
+                              country_code=country_code,
+                              state_code=state_code))
+
+@app.route('/states/<continent>/<country_code>')
+def show_states(continent, country_code):
+    try:
+        # Get country name
+        country = pycountry.countries.get(alpha_2=country_code)
+        if not country:
+            return render_template('error.html', message='Country not found')
+        
+        # Get states for the country
+        states = []
+        subdivisions = pycountry.subdivisions.get(country_code=country_code)
+        if subdivisions:
+            states = [{'name': sub.name, 'code': sub.code.split('-')[1]} for sub in subdivisions]
+        else:
+            # Fallback to states.json if no subdivisions found
+            with open('data/states.json', 'r') as f:
+                states_data = json.load(f)
+                country_states = states_data.get(country_code, [])
+                states = [{'name': state['name'], 'code': state['code']} for state in country_states]
+        
+        # Sort states by name
+        states.sort(key=lambda x: x['name'])
+        
+        return render_template('states.html', 
+                             continent=continent,
+                             country_code=country_code,
+                             country_name=country.name,
+                             states=states)
+    except Exception as e:
+        return render_template('error.html', message=str(e))
+
+@app.route('/api/search-cities')
+def search_cities():
+    """API endpoint to search for cities"""
+    try:
+        query = request.args.get('q', '').strip().lower()
+        if not query:
+            return jsonify({'cities': []})
+
+        # First try to get cities from the JSON file
+        cities = []
+        try:
+            with open('data/cities.json', 'r') as f:
+                cities_data = json.load(f)
+                
+            # Search through all countries and states
+            for country_code, country_cities in cities_data.items():
+                country = pycountry.countries.get(alpha_2=country_code)
+                if not country:
+                    continue
+
+                for state_code, state_cities in country_cities.items():
+                    for city in state_cities:
+                        if query in city['name'].lower():
+                            cities.append({
+                                'name': city['name'],
+                                'country_code': country_code,
+                                'country_name': country.name,
+                                'state_code': state_code
+                            })
+        except Exception as e:
+            print(f"Error reading cities.json: {str(e)}")
+
+        # If no cities found in JSON, use the fallback list
+        if not cities:
+            # Use the major cities list from get_cities function
+            major_cities = {
+                'US': {
+                    'AL': ['Birmingham', 'Montgomery', 'Mobile', 'Huntsville', 'Tuscaloosa', 'Auburn'],
+                    'AK': ['Anchorage', 'Fairbanks', 'Juneau', 'Wasilla', 'Sitka', 'Kodiak'],
+                    'AZ': ['Phoenix', 'Tucson', 'Mesa', 'Scottsdale', 'Glendale', 'Tempe', 'Chandler'],
+                    'CA': ['Los Angeles', 'San Francisco', 'San Diego', 'Sacramento', 'San Jose', 'Fresno', 'Long Beach', 'Oakland'],
+                    'CO': ['Denver', 'Colorado Springs', 'Aurora', 'Fort Collins', 'Lakewood', 'Thornton'],
+                    'CT': ['Bridgeport', 'New Haven', 'Hartford', 'Stamford', 'Waterbury', 'Norwalk'],
+                    'FL': ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'St. Petersburg', 'Hialeah', 'Fort Lauderdale', 'Tallahassee'],
+                    'GA': ['Atlanta', 'Augusta', 'Columbus', 'Macon', 'Savannah', 'Athens'],
+                    'IL': ['Chicago', 'Aurora', 'Rockford', 'Joliet', 'Naperville', 'Springfield'],
+                    'IN': ['Indianapolis', 'Fort Wayne', 'Evansville', 'South Bend', 'Carmel', 'Bloomington'],
+                    'MA': ['Boston', 'Worcester', 'Springfield', 'Cambridge', 'Lowell', 'Brockton'],
+                    'MI': ['Detroit', 'Grand Rapids', 'Warren', 'Sterling Heights', 'Lansing', 'Ann Arbor'],
+                    'MN': ['Minneapolis', 'St. Paul', 'Rochester', 'Duluth', 'Bloomington', 'Brooklyn Park'],
+                    'NY': ['New York City', 'Buffalo', 'Rochester', 'Syracuse', 'Yonkers', 'Albany'],
+                    'OH': ['Columbus', 'Cleveland', 'Cincinnati', 'Toledo', 'Akron', 'Dayton'],
+                    'PA': ['Philadelphia', 'Pittsburgh', 'Allentown', 'Erie', 'Reading', 'Scranton'],
+                    'TX': ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth', 'El Paso', 'Arlington', 'Corpus Christi'],
+                    'WA': ['Seattle', 'Spokane', 'Tacoma', 'Vancouver', 'Bellevue', 'Kent']
+                },
+                'CA': {
+                    'ON': ['Toronto', 'Ottawa', 'Hamilton', 'London', 'Windsor', 'Kitchener', 'Mississauga', 'Brampton'],
+                    'BC': ['Vancouver', 'Victoria', 'Surrey', 'Burnaby', 'Richmond', 'Abbotsford', 'Coquitlam'],
+                    'AB': ['Calgary', 'Edmonton', 'Red Deer', 'Lethbridge', 'St. Albert', 'Medicine Hat'],
+                    'QC': ['Montreal', 'Quebec City', 'Laval', 'Gatineau', 'Longueuil', 'Sherbrooke'],
+                    'NS': ['Halifax', 'Sydney', 'Truro', 'New Glasgow', 'Glace Bay', 'Kentville']
+                },
+                'GB': {
+                    'ENG': ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Leeds', 'Sheffield', 'Bristol', 'Newcastle'],
+                    'SCT': ['Edinburgh', 'Glasgow', 'Aberdeen', 'Dundee', 'Inverness', 'Perth'],
+                    'WLS': ['Cardiff', 'Swansea', 'Newport', 'Bangor', 'St. Davids', 'St. Asaph'],
+                    'NIR': ['Belfast', 'Derry', 'Lisburn', 'Newry', 'Bangor', 'Craigavon']
+                },
+                'AU': {
+                    'NSW': ['Sydney', 'Newcastle', 'Wollongong', 'Maitland', 'Coffs Harbour', 'Wagga Wagga'],
+                    'VIC': ['Melbourne', 'Geelong', 'Ballarat', 'Bendigo', 'Shepparton', 'Melton'],
+                    'QLD': ['Brisbane', 'Gold Coast', 'Sunshine Coast', 'Townsville', 'Cairns', 'Toowoomba'],
+                    'WA': ['Perth', 'Bunbury', 'Geraldton', 'Albany', 'Kalgoorlie', 'Broome'],
+                    'SA': ['Adelaide', 'Mount Gambier', 'Whyalla', 'Murray Bridge', 'Port Augusta', 'Port Pirie']
+                },
+                'IN': {
+                    'MH': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Aurangabad'],
+                    'KA': ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum', 'Gulbarga'],
+                    'TN': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', 'Tirunelveli'],
+                    'GJ': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar'],
+                    'DL': ['New Delhi', 'Delhi Cantonment', 'New Delhi Cantonment']
+                },
+                'CN': {
+                    'BJ': ['Beijing', 'Tongzhou', 'Changping', 'Daxing', 'Fangshan', 'Mentougou'],
+                    'SH': ['Shanghai', 'Pudong', 'Huangpu', 'Xuhui', 'Changning', 'Jing\'an'],
+                    'GD': ['Guangzhou', 'Shenzhen', 'Dongguan', 'Foshan', 'Zhuhai', 'Shantou'],
+                    'JS': ['Nanjing', 'Suzhou', 'Wuxi', 'Changzhou', 'Nantong', 'Yangzhou'],
+                    'ZJ': ['Hangzhou', 'Ningbo', 'Wenzhou', 'Shaoxing', 'Jinhua', 'Huzhou']
+                },
+                'BR': {
+                    'SP': ['São Paulo', 'Campinas', 'Santos', 'São José dos Campos', 'Ribeirão Preto', 'Sorocaba'],
+                    'RJ': ['Rio de Janeiro', 'Niterói', 'São Gonçalo', 'Duque de Caxias', 'Nova Iguaçu', 'São João de Meriti'],
+                    'MG': ['Belo Horizonte', 'Uberlândia', 'Contagem', 'Juiz de Fora', 'Betim', 'Montes Claros'],
+                    'RS': ['Porto Alegre', 'Caxias do Sul', 'Pelotas', 'Canoas', 'Santa Maria', 'Novo Hamburgo'],
+                    'PR': ['Curitiba', 'Londrina', 'Maringá', 'Ponta Grossa', 'Cascavel', 'São José dos Pinhais']
+                }
+            }
+
+            # Search through major cities
+            for country_code, states in major_cities.items():
+                country = pycountry.countries.get(alpha_2=country_code)
+                if not country:
+                    continue
+
+                for state_code, cities_list in states.items():
+                    for city_name in cities_list:
+                        if query in city_name.lower():
+                            cities.append({
+                                'name': city_name,
+                                'country_code': country_code,
+                                'country_name': country.name,
+                                'state_code': state_code
+                            })
+
+        # Sort results by city name
+        cities.sort(key=lambda x: x['name'])
+
+        # Limit results to prevent overwhelming response
+        return jsonify({'cities': cities[:10]})
+
+    except Exception as e:
+        print(f"Error searching cities: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/weather/custom/<city_name>')
+def show_custom_city_weather(city_name):
+    """Show weather for a custom city search"""
+    try:
+        country_code = request.args.get('country')
+        
+        # Get weather data
+        if country_code:
+            weather_data = get_weather('custom', country_code, city_name)
+        else:
+            weather_data = get_custom_city_weather(city_name)
+            
+        if isinstance(weather_data, tuple):  # Error response
+            flash(weather_data[0].get('error', 'Failed to fetch weather data'))
+            return redirect(url_for('weather'))
+            
+        return render_template('city_weather.html',
+                             city_name=city_name,
+                             weather=weather_data,
+                             is_custom=True)
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for('weather'))
 
 # Initialize data when starting the application
 load_data()

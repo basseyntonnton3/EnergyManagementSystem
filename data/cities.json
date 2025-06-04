@@ -1,0 +1,78 @@
+{
+  "US": {
+    "CA": [
+      { "name": "Los Angeles", "code": "LAX" },
+      { "name": "San Francisco", "code": "SFO" },
+      { "name": "San Diego", "code": "SAN" },
+      { "name": "Sacramento", "code": "SAC" }
+    ],
+    "NY": [
+      { "name": "New York City", "code": "NYC" },
+      { "name": "Buffalo", "code": "BUF" },
+      { "name": "Rochester", "code": "ROC" },
+      { "name": "Syracuse", "code": "SYR" }
+    ],
+    "TX": [
+      { "name": "Houston", "code": "HOU" },
+      { "name": "Dallas", "code": "DAL" },
+      { "name": "Austin", "code": "AUS" },
+      { "name": "San Antonio", "code": "SAT" }
+    ]
+  },
+  "CA": {
+    "ON": [
+      { "name": "Toronto", "code": "TOR" },
+      { "name": "Ottawa", "code": "OTT" },
+      { "name": "Hamilton", "code": "HAM" },
+      { "name": "London", "code": "LON" }
+    ],
+    "BC": [
+      { "name": "Vancouver", "code": "VAN" },
+      { "name": "Victoria", "code": "VIC" },
+      { "name": "Surrey", "code": "SUR" },
+      { "name": "Burnaby", "code": "BUR" }
+    ]
+  },
+  "IN": {
+    "MH": [
+      { "name": "Mumbai", "code": "BOM" },
+      { "name": "Pune", "code": "PNQ" },
+      { "name": "Nagpur", "code": "NAG" },
+      { "name": "Nashik", "code": "NSK" }
+    ],
+    "DL": [
+      { "name": "New Delhi", "code": "DEL" },
+      { "name": "Delhi", "code": "DEL" },
+      { "name": "Gurgaon", "code": "GUR" },
+      { "name": "Noida", "code": "NOI" }
+    ]
+  },
+  "CN": {
+    "BJ": [
+      { "name": "Beijing", "code": "BJS" },
+      { "name": "Tianjin", "code": "TJS" },
+      { "name": "Shijiazhuang", "code": "SJW" },
+      { "name": "Baoding", "code": "BDG" }
+    ],
+    "SH": [
+      { "name": "Shanghai", "code": "SHA" },
+      { "name": "Suzhou", "code": "SZV" },
+      { "name": "Nanjing", "code": "NKG" },
+      { "name": "Hangzhou", "code": "HGH" }
+    ]
+  },
+  "BR": {
+    "SP": [
+      { "name": "São Paulo", "code": "SAO" },
+      { "name": "Campinas", "code": "CPQ" },
+      { "name": "Santos", "code": "SSZ" },
+      { "name": "Ribeirão Preto", "code": "RAO" }
+    ],
+    "RJ": [
+      { "name": "Rio de Janeiro", "code": "RIO" },
+      { "name": "Niterói", "code": "NIT" },
+      { "name": "Nova Iguaçu", "code": "NIG" },
+      { "name": "São Gonçalo", "code": "SGO" }
+    ]
+  }
+}
